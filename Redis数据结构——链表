@@ -1,4 +1,18 @@
 
+
+
+typedef struct listNode
+{ 
+	// 前置节点 
+	struct listNode *prev; 
+	// 后置节点 
+	struct listNode *next; 
+	// 节点的值 
+	void *value; 
+} listNode;
+
+
+
 Redis链表结构其主要特性如下:
 
 双向：链表节点带有前驱、后继指针获取某个节点的前驱、后继节点的时间复杂度为0(1);
