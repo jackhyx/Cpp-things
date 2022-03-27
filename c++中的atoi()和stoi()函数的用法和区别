@@ -1,0 +1,16 @@
+c++中的atoi()和stoi()函数的用法和区别
+
+相同点：
+
+## atoi()和stoi()都是C++的字符处理函数，把数字字符串转换成int输出
+
+## 头文件都是#include<string>
+
+不同点：
+
+## atoi()的参数是 const char*,因此对于一个字符串str我们必须调用 c_str()的方法把这个string转换成 const char*类型的
+而stoi()的参数是const string*,不需要转化为 const char*；
+
+## stoi()会做范围检查，默认范围是在int的范围内的，如果超出范围的话则会runtime error！
+而atoi()不会做范围检查，如果超出范围的话，超出上界，则输出上界，超出下界，则输出下界；
+
