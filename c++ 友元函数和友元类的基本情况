@@ -1,0 +1,75 @@
+## 友元函数和友元类的基本情况
+友元提供了不同类的成员函数之间、类的成员函数和一般函数之间进行数据共享的机制
+通过友元，一个不同函数或者另一个类中的成员函数可以访问类中的私有成员和保护成员
+友元的正确使用能提高程序的运行效率，但同时也破坏了类的封装性和数据的隐藏性，导致程序可维护性变差。
+
+# 友元函数
+
+友元函数是定义在类外的普通函数，不属于任何类，可以访问其他类的私有成员
+但是需要在类的定义中声明所有可以访问它的友元函数。
+
+#include <iostream>
+
+using namespace std;
+
+class A
+{
+public:
+    friend void set_show(int x, A &a);      //该函数是友元函数的声明
+private:
+    int data;
+};
+
+void set_show(int x, A &a)  //友元函数定义，为了访问类A中的成员
+{
+    a.data = x;
+    cout << a.data << endl;
+}
+int main(void)
+{
+    class A a;
+
+    set_show(1, a);
+
+    return 0;
+}
+
+一个函数可以是多个类的友元函数，但是每个类中都要声明这个函数。
+
+# 友元类
+
+友元类的所有成员函数都是另一个类的友元函数，都可以访问另一个类中的隐藏信息（包括私有成员和保护成员）。
+但是另一个类里面也要相应的进行声明
+
+ #include <iostream>
+
+using namespace std;
+
+class A
+{
+public:
+    friend class C;                         //这是友元类的声明
+private:
+    int data;
+};
+
+class C             //友元类定义，为了访问类A中的成员
+{
+public:
+    void set_show(int x, A &a) { a.data = x; cout<<a.data<<endl;}
+};
+
+int main(void)
+{
+    class A a;
+    class C c;
+
+    c.set_show(1, a);
+
+    return 0;
+}
+Copy to clipboardErrorCopied
+# 使用友元类时注意：
+友元关系不能被继承。
+友元关系是单向的，不具有交换性。若类B是类A的友元，类A不一定是类B的友元，要看在类中是否有相应的声明。
+友元关系不具有传递性。若类B是类A的友元，类C是B的友元，类C不一定是类A的友元，同样要看类中是否有相应的申明
