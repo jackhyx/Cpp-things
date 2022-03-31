@@ -19,10 +19,86 @@
 # 底层通过红黑树实现。
 
 
+## STL中map的实现
+map的特性是所有元素会根据键值进行自动排序。map中所有的元素都是pair，拥有键值(key)和实值(value)两个部分，并且不允许元素有相同的key
+一旦map的key确定了，那么是无法修改的，但是可以修改这个key对应的value，因此map的迭代器既不是constant iterator，也不是mutable iterator
+标准STL map的底层机制是RB-tree（红黑树），另一种以hash table为底层机制实现的称为hash_map。map的架构如下图所示
+map的在构造时默认采用递增排序key，也使用alloc配置器配置空间大小，需要注意的是在插入元素时，调用的是红黑树中的insert_unique()方法，而非insert_euqal()（multimap使用）
+
+#include <map>
+#include <iostream>
+#include <string>
+using namespace std;
+
+int main()
+{
+    map<string, int> maps;
+    //插入若干元素
+    maps["jack"] = 1;
+    maps["jane"] = 2;
+    maps["july"] = 3;
+    //以pair形式插入
+    pair<string, int> p("david", 4);
+    maps.insert(p);
+    //迭代输出元素
+    map<string, int>::iterator iter = maps.begin();
+    for (; iter != maps.end(); ++iter)
+    {
+        cout << iter->first << " ";
+        cout << iter->second << "--"; //david 4--jack 1--jane 2--july 3--
+    }
+    cout << endl;
+    //使用subscipt操作取实值
+    int num = maps["july"];
+    cout << num << endl; // 3
+    //查找某key
+    iter = maps.find("jane");
+    if(iter != maps.end())
+        cout << iter->second << endl; // 2
+    //修改实值
+    iter->second = 100;
+    int num2 = maps["jane"]; // 100
+    cout << num2 << endl;
+
+    return 0;
+}
+
+需要注意的是subscript（下标）操作既可以作为左值运用（修改内容）也可以作为右值运用（获取实值）。例如：
+maps["abc"] = 1; //左值运用int num = masp["abd"]; //右值运用
+Copy to clipboardErrorCopied
+无论如何，subscript操作符都会先根据键值找出实值，源码如下：
+...T& operator[](const key_type& k){    
+    return (*((insert(value_type(k, T()))).first)).second;
+}...
+代码运行过程是：首先根据键值和实值做出一个元素，这个元素的实值未知，因此产生一个与实值型别相同的临时对象替代：
+value_type(k, T());
+Copy to clipboardErrorCopied
+再将这个对象插入到map中，并返回一个pair：
+pair<iterator,bool> insert(value_type(k, T()));
+Copy to clipboardErrorCopied
+pair第一个元素是迭代器，指向当前插入的新元素，如果插入成功返回true，此时对应左值运用，根据键值插入实值
+插入失败（重复插入）返回false，此时返回的是已经存在的元素，则可以取到它的实值
+
+(insert(value_type(k, T()))).first; //迭代器
+*((insert(value_type(k, T()))).first); //解引用
+(*((insert(value_type(k, T()))).first)).second; //取出实值
+由于这个实值是以引用方式传递，因此作为左值或者右值都可以
+
+##再解释：
+map<string,int> imap;
+pair<string,int> tmp("A",1);
+imap.insert(tmp);
+imap[string("B")]=2;//#  当“[ ]”返回的元素作为左值运用时，如果没有‘B’，则在红黑树中插入这个节点，如果有‘B’，则返回指向这个节点的迭代器 #
+int second=imp[string("C")];
+map<string,int>::iterator imapIter=imap.begin();
+while(imapIter!=imap.end())
+{
+  cout<<(*imapIter).first<<" "<<(*imapIter).second<<endl;
+  imapIter++;
+}
 
 T& operator[](const key_type& k) {//中括号里面输入key，找出对应的值，如果没有则创建对应的key
 return (*((insert(value_type(k, T()))).first)).second;
-
 ## 注意的点：
 # map内部是将Key和Value包装成pair对象操作，所以当使用插入操作的时候，必须将key和Value通用保证成pair对象插入。如同mymap.insert( pair<string , int>("david" , 5) );
 并且typedef pair<const Key, T> value_type中的key为const型别，所以不允许迭代器修改key的值，也就是说一个节点的key只可赋值一次而已，但是可以修改value数值
@@ -42,9 +118,6 @@ return (*((insert(value_type(k, T()))).first)).second;
 # unordered_map容器：该容器的底层是由哈希(又名散列)函数组织实现的# 元素的顺序并不是由键值决定 #而是由键值的哈希值确定的 # 哈希值是由哈希函数生成的一个整数
 利用哈希函数，将关键字的哈希值都放在一个桶（bucket）里面，具有相同哈希值的放到同一个桶
 # unordered_map内部元素的存储是无序的，也不允许有重复键值的元素，相当于java中的HashMap。
-
 # unordered_multimap容器：也可以通过键值生成的哈希值来确定对象的位置，但是它允许有重复的元素。
-
 # multi前缀表明键值不必唯一，但是如果没有这个前缀，键值必须唯一。
-
 # unordered前缀表明容器中元素的位置是通过其键值所产生的哈希值来决定的，而不是通过比较键值决定的，即容器中的元素是无序的。如果没有这个前缀，则容器中元素是由比较键值决定的，即有序。
