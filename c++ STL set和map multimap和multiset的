@@ -1,0 +1,50 @@
+## set和multiset介绍
+
+# set和multiset以底层红黑树为结构
+# set的key和value是合一的，value就是key # 通过比较key插入平衡二叉树 # 
+# 可以通过迭代器，从小到大输出key，也就是所谓的自动排序，二叉树以及排好序了 #
+# 禁止通过迭代器修改key，否则二叉树结构变化了，如果希望修改一个元素值，必须先删除原有的元素，再插入新的元素。
+
+# set的特性：
+# 所以元素都会根据元素的键值# 自动排序 #
+# set元素的键值就是实值，实值就是键值。set不允许两个元素有相同的键值。
+# 底层直接用红黑树实现，然后通过中序遍历，即可返回键值由小到大的排列。
+# 不允许相同的元素存在，底层采用RB-tree的insert_unique() 独一无二的插入，当插入的元素已经存在于集合中，那么将忽略
+# 而mulitiset采用inset_equal()实现，允许相同的key存在于集合之中。
+
+## map和multimap介绍
+# 所有元素都会根据元素的键值（key）自动被排序。
+# map的所有元素都是pair，同时拥有实值(value)和键值(key)。pair的第一个元素是key，第二个是value。map不允许两个元素拥有相同的键值，multimap允许。
+# map迭代器不允许改变map的元素的key，否则破坏map排序。但是可以修改value，例如键是学生，值是学生的成绩单，那么成绩应该可以变。所以迭代器允许修改value而不允许修改key。
+# 底层通过红黑树实现。
+
+
+
+T& operator[](const key_type& k) {//中括号里面输入key，找出对应的值，如果没有则创建对应的key
+return (*((insert(value_type(k, T()))).first)).second;
+
+## 注意的点：
+# map内部是将Key和Value包装成pair对象操作，所以当使用插入操作的时候，必须将key和Value通用保证成pair对象插入。如同mymap.insert( pair<string , int>("david" , 5) );
+并且typedef pair<const Key, T> value_type中的key为const型别，所以不允许迭代器修改key的值，也就是说一个节点的key只可赋值一次而已，但是可以修改value数值
+
+# T& operator[](const key_type& k)[]里面输入参数是key，返回是value的引用
+首先value_type(k, T())将key和value合成一个pair临时对象，然后插入红黑树，并返回一个pair对象，first是迭代器（key不存在则指向新节点，存在则指向老节点），second是成功与否
+然后通过迭代器获取pair元素的第二个值的引用
+如果key存在，则修改其value，如果key不存在，则插入key并且用填入value。总之这里返回的时候value的引用。当做左值，则修改，当做右值则读取。
+
+# 注意map的迭代器指向的是节点，节点里面Value_filed是pair对象。所以通过迭代器的(*mymapIter)是获取了节点中的pair对象，然后通过.运算符获取其中的key和value。
+
+# []运算符重载是map特有的方法，mulitimap里面并没有重载这个方法。
+
+
+## unordered_map和unordered_multimap介绍
+
+# unordered_map容器：该容器的底层是由哈希(又名散列)函数组织实现的# 元素的顺序并不是由键值决定 #而是由键值的哈希值确定的 # 哈希值是由哈希函数生成的一个整数
+利用哈希函数，将关键字的哈希值都放在一个桶（bucket）里面，具有相同哈希值的放到同一个桶
+# unordered_map内部元素的存储是无序的，也不允许有重复键值的元素，相当于java中的HashMap。
+
+# unordered_multimap容器：也可以通过键值生成的哈希值来确定对象的位置，但是它允许有重复的元素。
+
+# multi前缀表明键值不必唯一，但是如果没有这个前缀，键值必须唯一。
+
+# unordered前缀表明容器中元素的位置是通过其键值所产生的哈希值来决定的，而不是通过比较键值决定的，即容器中的元素是无序的。如果没有这个前缀，则容器中元素是由比较键值决定的，即有序。
