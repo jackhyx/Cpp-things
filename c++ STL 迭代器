@@ -1,0 +1,86 @@
+
+OOP：将 methods 和 datas 关联到一起 （通俗点就是方法和成员变量放到一个类中实现）
+通过继承的方式，利用虚函数表（virtual）来实现运行时类型的判定，也叫"动态多态"，由于运行过程中需根据类型去检索虚函数表，因此效率相对较低。
+
+GP：泛型编程，也被称为"静态多态"，多种数据类型在同一种算法或者结构上皆可操作，其效率与针对某特定数据类型而设计的算法或者结构相同
+具体数据类型在编译期确定，编译器承担更多，代码执行效率高。在 STL 中利用 GP 将 methods 和 datas 实现了分而治之
+
+
+## STL中迭代器失效的情况有哪些
+以vector为例：
+# 插入元素：
+尾后插入：size < capacity时，首迭代器不失效尾迭代失效（未重新分配空间），size == capacity时，所有迭代器均失效（需要重新分配空间）。
+中间插入：中间插入：size < capacity时，首迭代器不失效但插入元素之后所有迭代器失效，size == capacity时，所有迭代器均失效。
+
+# 删除元素：
+尾后删除：只有尾迭代失效。
+中间删除：删除位置之后所有迭代失效。
+
+deque 和 vector 的情况类似
+而list双向链表每一个节点内存不连续, 删除节点仅当前迭代器失效,erase返回下一个有效迭代器;
+
+map/set等关联容器底层是红黑树删除节点不会影响其他节点的迭代器, 使用递增方法获取下一个迭代器 mmp.erase(iter++);
+
+unordered_(hash) 迭代器意义不大, rehash之后, 迭代器应该也是全部失效.
+
+## 说一下STL每种容器对应的迭代器
+
+      容器	                                 迭代器
+vector、deque	                           随机访问迭代器
+
+stack、queue、priority_queue	               无
+
+list、(multi)set/map	                     双向迭代器
+
+unordered_(multi)set/map、forward_list	   前向迭代器
+
+## STL迭代器如何实现
+
+迭代器是一种抽象的设计理念，通过迭代器可以在不了解容器内部原理的情况下遍历容器，除此之外，STL中迭代器一个最重要的作用就是作为容器与STL算法的粘合剂。
+迭代器的作用就是提供一个遍历容器内部所有元素的接口，因此迭代器内部必须保存一个与容器相关联的指针，然后重载各种运算操作来遍历
+其中最重要的是*运算符与->运算符，以及++、--等可能需要重载的运算符重载
+这和C++中的智能指针很像，智能指针也是将一个指针封装，然后通过引用计数或是其他方法完成自动释放内存的功能。
+
+
+## 迭代器的型别
+
+我们再来看看迭代器的型别，常见迭代器相应型别有 5 种：
+value_type：迭代器所指对象的类型，原生指针也是一种迭代器，对于原生指针 int*，int 即为指针所指对象的类型，也就是所谓的 value_type 。
+difference_type： 用来表示两个迭代器之间的距离，对于原生指针，STL 以 C++ 内建的 ptrdiff_t 作为原生指针的 difference_type。
+reference_type： 是指迭代器所指对象的类型的引用，reference_type 一般用在迭代器的 * 运算符重载上，如果 value_type 是 T，那么对应的 reference_type 就是 T&；如果 value_type 是 const T，那么对应的reference_type 就是 const T&。
+pointer_type： 就是相应的指针类型，对于指针来说，最常用的功能就是 operator* 和 operator-> 两个运算符。
+iterator_category： 的作用是标识迭代器的移动特性和可以对迭代器执行的操作，从 iterator_category 上，可将迭代器分为 Input Iterator、Output Iterator、Forward Iterator、Bidirectional Iterator、Random Access Iterator 五类，这样分可以尽可能地提高效率。
+template<typename Category,
+           typename T,
+           typename Distance = ptrdiff_t,
+           typename Pointer = T*,
+           typename Reference = T&>
+struct iterator //迭代器的定义
+  {
+      typedef Category iterator_category;
+      typedef T value_type;
+      typedef Distance difference_type;
+      typedef Pointer pointer;
+      typedef Reference reference;
+  };
+## 迭代器的分类
+迭代器型别 iterator_category 对应的迭代器类别，这个类别会限制迭代器的操作和移动特性。 除了原生指针以外，迭代器被分为五类：
+Input Iterator： 此迭代器不允许修改所指的对象，是只读的。支持 ==、!=、++、*、-> 等操作。
+Output Iterator：允许算法在这种迭代器所形成的区间上进行只写操作。支持 ++、* 等操作。
+Forward Iterator：允许算法在这种迭代器所形成的区间上进行读写操作，但只能单向移动，每次只能移动一步。支持 Input Iterator 和 Output Iterator 的所有操作。
+Bidirectional Iterator：允许算法在这种迭代器所形成的区间上进行读写操作，可双向移动，每次只能移动一步。支持 Forward Iterator 的所有操作，并另外支持 – 操作。
+Random Access Iterator：包含指针的所有操作，可进行随机访问，随意移动指定的步数。支持前面四种 Iterator 的所有操作，并另外支持 [n] 操作符等操作。
+
+
+##traits编程技法总结
+回想萃取之前的版本有什么缺陷：不支持原生指针。而通过萃取机的封装，我们可以通过类模板的特化来支持原生指针的版本
+如此一来，无论是智能指针，还是原生指针，iterator_traits::value_type 都能起作用，这就解决了前面的问题。
+
+//iterator_traits的偏特化版本，针对迭代器是原生指针的情况
+template<typename T>
+struct iterator_traits<T*> {
+    typedef T value_type;
+};
+
+增加一层中间的模板 class，以解决获取迭代器的型别中的原生指针问题。
+利用一个中间层 iterator_traits 固定了 func 的形式，使得重复的代码大量减少，唯一要做的就是稍稍特化一下 iterator_tartis 使其支持 pointer 和 const pointer 。
