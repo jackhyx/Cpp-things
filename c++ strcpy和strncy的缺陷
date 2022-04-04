@@ -1,0 +1,40 @@
+## strcpy和strncy的缺陷
+
+
+# 存在潜在越界问题
+当dest的长度 < src的长度的时候，由于无法根据指针判定其所指指针的长度，故数组内存边界不可知的。
+因此会导致内存越界，尤其是当数组是分配在栈空间的，其越界会进入你的程序代码区，将使你的程序出现非常隐晦的异常。
+
+# 字符串结束标志服'\0'丢失
+当dest所指对象的数组长度==count的时候，调用strncpy使得dest字符结束符'\0'丢失。
+
+# 效率较低
+当count > src所指对象的长度的时候，会继续填充'\0'知道count的长度为止。
+
+# 不能处理内存覆盖问题
+不能处理dest和src内存重叠的情况。
+
+
+## strcpy
+
+函数原型为char *strcpy(char *dest,const char *src);
+函数说明：strcpy函数会将参数src字符串拷贝至参数dest所指的地址。
+参数说明：dest，我们说的出参，最终得到的字符串。src，入参，因为其有const修饰。表示在此函数中不会也不能修改src的值。
+返回值：返回dest字符串的起始地址。
+# 附加说明：如果参数dest所指的内存空间不够大，可能会造成缓冲溢出的错误情况。
+
+
+## strncpy
+函数原型为：char *strncpy(char *dest,const char *src ,size_t n);
+函数说明：strncpy会将参数src字符串拷贝前n个字符至参数dest所指的地址。
+返回值：返回参数dest的字符串起始地址。
+特别强调：不要以为这个函数是个好东西，往往在定位问题时，它是罪魁祸首，到顶了，它是静态的容值函数，程序跑起来你就等着dbug吧。
+# strncpy的正确用法：
+strncpy(dest, src, sizeof(dest))；
+dest[sizeof(dest)-1] = '\0';
+
+size一定要用sizeof(dest)或sizeof(dest)-1，不可误用sizeof(src).
+手工填0. 务必要把dest的最后一个字节手工设置为0. 因为strncpy仅在src的长度小于dest时，对剩余的字节填0.
+性能问题。当dest长度远大于src时，由于strncpy会对多余的每个字节填0，会有很大的性能损失。
+返回值。strncpy返回dest，因而无法知道拷贝了多少个字节。
+ 
