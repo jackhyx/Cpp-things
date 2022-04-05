@@ -1,0 +1,126 @@
+## 回溯是递归的副产品，只要有递归就会有回溯
+
+## 回溯的本质是穷举，穷举所有可能，然后选出我们想要的答案
+
+## 回溯法，一般可以解决如下几种问题：
+
+组合问题：N个数里面按一定规则找出k个数的集合
+切割问题：一个字符串按一定规则有几种切割方式
+子集问题：一个N个数的集合里有多少符合条件的子集
+排列问题：N个数按一定规则全排列，有几种排列方式
+棋盘问题：N皇后，解数独等等
+
+void backtracking(参数) {
+    if (终止条件) {
+        存放结果;
+        return;
+    }
+
+    for (选择：本层集合中元素（树中节点孩子的数量就是集合的大小）) {
+        处理节点;
+        backtracking(路径，选择列表); // 递归
+        回溯，撤销处理结果
+    }
+}
+### 子集问题：一个N个数的集合里有多少符合条件的子集
+## 491. 递增子序列
+给你一个整数数组 nums ，找出并返回所有该数组中不同的递增子序列，递增子序列中 至少有两个元素 。你可以按 任意顺序 返回答案。
+数组中可能含有重复元素，如出现两个整数相等，也可以视作递增序列的一种特殊情况。
+#
+class Solution {
+private:
+    vector<vector<int>> result;
+    vector<int> path;
+    void backtracking(vector<int>& nums, int startIndex) {
+        if (path.size() > 1) {
+            result.push_back(path);
+        }
+
+        unordered_set<int> uset;
+        for (int i = startIndex; i < nums.size(); i++) {
+            if ((!path.empty() && nums[i] < path.back()) || uset.count(nums[i])) {
+                continue;
+            }
+        
+        uset.insert(nums[i]);
+        path.push_back(nums[i]);
+        backtracking(nums, i + 1);
+        path.pop_back();
+        }
+    }
+    
+public:
+    vector<vector<int>> findSubsequences(vector<int>& nums) {
+        result.clear();
+        path.clear();
+
+        backtracking(nums, 0);
+
+        return result;
+
+    }
+};
+## 90. 子集 II
+给你一个整数数组 nums ，其中可能包含重复元素，请你返回该数组所有可能的子集（幂集）。
+解集 不能 包含重复的子集。返回的解集中，子集可以按 任意顺序 排列。
+#
+class Solution {
+private:
+    vector<int> path;
+    vector<vector<int>> result;
+
+    void backtracking(vector<int>& nums, int startIndex) {
+        result.push_back(path);
+       
+        for (int i = startIndex; i < nums.size(); i++) {
+
+            if (i > startIndex && nums[i] == nums[i - 1]) continue;
+
+            path.push_back(nums[i]);
+            backtracking (nums, i + 1);
+            path.pop_back();
+        }
+    
+
+    }
+
+public:
+    vector<vector<int>> subsetsWithDup(vector<int>& nums) {
+        path.clear();
+        result.clear();
+        
+        sort(nums.begin(), nums.end());
+
+        backtracking (nums, 0);
+        return result;
+    }
+};
+#
+#
+## 78. 子集
+给你一个整数数组 nums ，数组中的元素 互不相同 。返回该数组所有可能的子集（幂集）。
+解集 不能 包含重复的子集。你可以按 任意顺序 返回解集。
+#
+class Solution {
+private:
+    vector<vector<int>> result;
+    vector<int> path;
+    void backtracking(vector<int>& nums, int startIndex) {
+        result.push_back(path); // 收集子集，要放在终止添加的上面，否则会漏掉自己
+        if (startIndex >= nums.size()) { // 终止条件可以不加
+            return;
+        }
+        for (int i = startIndex; i < nums.size(); i++) {
+            path.push_back(nums[i]);
+            backtracking(nums, i + 1);
+            path.pop_back();
+        }
+    }
+public:
+    vector<vector<int>> subsets(vector<int>& nums) {
+        result.clear();
+        path.clear();
+        backtracking(nums, 0);
+        return result;
+    }
+};
