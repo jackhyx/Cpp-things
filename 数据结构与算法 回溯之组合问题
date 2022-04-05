@@ -154,3 +154,53 @@ public:
         return result;
     }
 };
+#
+#
+## 78. 子集
+给你一个整数数组 nums ，数组中的元素 互不相同 。返回该数组所有可能的子集（幂集）。
+解集 不能 包含重复的子集。你可以按 任意顺序 返回解集。
+#
+#
+## 90. 子集 II
+给你一个整数数组 nums ，其中可能包含重复元素，请你返回该数组所有可能的子集（幂集）。
+解集 不能 包含重复的子集。返回的解集中，子集可以按 任意顺序 排列。
+#
+#
+## 491. 递增子序列
+给你一个整数数组 nums ，找出并返回所有该数组中不同的递增子序列，递增子序列中 至少有两个元素 。你可以按 任意顺序 返回答案。
+数组中可能含有重复元素，如出现两个整数相等，也可以视作递增序列的一种特殊情况。
+#
+class Solution {
+private:
+    vector<vector<int>> result;
+    vector<int> path;
+    void backtracking(vector<int>& nums, int startIndex) {
+        if (path.size() > 1) {
+            result.push_back(path);
+            // 注意这里不要加return，要取树上的节点
+        }
+        
+        unordered_set<int> uset;                              // 使用set对本层元素进行去重
+        for (int i = startIndex; i < nums.size(); i++) {
+            if ((!path.empty() && nums[i] < path.back())      // 子集也是递增的
+                    || uset.find(nums[i]) != uset.end()) {
+                    continue;
+            }
+            
+            uset.insert(nums[i]);                            // 记录这个元素在本层用过了，本层后面不能再用了
+            path.push_back(nums[i]);
+            backtracking(nums, i + 1);
+            path.pop_back();
+        }
+    }
+public:
+    vector<vector<int>> findSubsequences(vector<int>& nums) {
+        result.clear();
+        path.clear();
+        backtracking(nums, 0);
+        return result;
+    }
+};
+
+ 
+
