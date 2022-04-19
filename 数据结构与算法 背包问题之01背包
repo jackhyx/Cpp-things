@@ -1,0 +1,159 @@
+## 背包问题有多种背包方式，常见的有：01背包、完全背包、多重背包、分组背包和混合背包等等。
+## 要注意题目描述中商品是不是可以重复放入。
+## 即一个商品如果# 可以重复多次放入是完全背包 #，而# 只能放入一次是01背包 #，写法还是不一样的。
+
+01 背包
+## 有n件物品和一个最多能背重量为w 的背包。第i件物品的重量是weight[i]，得到的价值是value[i] 。每件物品只能用一次，求解将哪些物品装入背包里物品价值总和最大。
+#
+# 二维数组
+vector<vector<int>> dp(weight.size(), vector<int>(bagweight + 1, 0));
+
+    // 初始化
+for (int j = weight[0]; j <= bagweight; j++) {
+  dp[0][j] = value[0];
+}
+
+    // weight数组的大小 就是物品个数
+for(int i = 1; i < weight.size(); i++) { // 遍历物品
+
+  for(int j = 0; j <= bagweight; j++) { // 遍历背包容量
+  
+    if (j < weight[i]) dp[i][j] = dp[i - 1][j];
+    
+    else dp[i][j] = max(dp[i - 1][j], dp[i - 1][j - weight[i]] + value[i]);
+  }
+      }
+# 一维数组
+# 如果使用一维dp数组，物品遍历的for循环放在外层，遍历背包的for循环放在内层，且内层for循环倒序遍历！
+// 初始化
+vector<int> dp(bagWeight + 1, 0);
+
+for(int i = 0; i < weight.size(); i++) { // 遍历物品
+
+  for(int j = bagWeight; j >= weight[i]; j--) { // 遍历背包容量
+  
+    dp[j] = max(dp[j], dp[j - weight[i]] + value[i]);
+  }
+#
+#
+#416. 分割等和子集
+给你一个 只包含正整数 的 非空 数组 nums 。请你判断是否可以将这个数组分割成两个子集，使得两个子集的元素和相等。
+#
+class Solution {
+public:
+    bool canPartition(vector<int>& nums) {
+        int sum = 0;
+
+        // dp[i]中的i表示背包内总和
+        // 题目中说：每个数组中的元素不会超过 100，数组的大小不会超过 200
+        // 总和不会大于20000，背包最大只需要其中一半，所以10001大小就可以了
+        vector<int> dp(10001, 0);
+        for (int i = 0; i < nums.size(); i++) {
+            sum += nums[i];
+        }
+        if (sum % 2 == 1) return false;
+        int target = sum / 2;
+
+        // 开始 01背包
+        for(int i = 0; i < nums.size(); i++) {
+            for(int j = target; j >= nums[i]; j--) { // 每一个元素一定是不可重复放入，所以从大到小遍历
+                dp[j] = max(dp[j], dp[j - nums[i]] + nums[i]);
+            }
+        }
+        // 集合中的元素正好可以凑成总和target
+        if (dp[target] == target) return true;
+        return false;
+    }
+};
+#
+#
+# 1049. 最后一块石头的重量 II
+有一堆石头，用整数数组 stones 表示。其中 stones[i] 表示第 i 块石头的重量。
+每一回合，从中选出任意两块石头，然后将它们一起粉碎。假设石头的重量分别为 x 和 y，且 x <= y。
+那么粉碎的可能结果如下：
+如果 x == y，那么两块石头都会被完全粉碎；
+如果 x != y，那么重量为 x 的石头将会完全粉碎，而重量为 y 的石头新重量为 y-x。
+最后，最多只会剩下一块 石头。返回此石头 最小的可能重量 。如果没有石头剩下，就返回 0。
+#
+class Solution {
+public:
+    int lastStoneWeightII(vector<int>& stones) {
+        vector<int> dp(15001, 0);
+        int sum = 0;
+        for (int i = 0; i < stones.size(); i++) sum += stones[i];
+        int target = sum / 2;
+        for (int i = 0; i < stones.size(); i++) { // 遍历物品
+            for (int j = target; j >= stones[i]; j--) { // 遍历背包
+                dp[j] = max(dp[j], dp[j - stones[i]] + stones[i]);
+            }
+        }
+        return sum - dp[target] - dp[target];
+    }
+};
+
+# 弄清什么是组合，什么是排列很重要。
+# 组合不强调顺序，(1,5)和(5,1)是同一个组合。
+# 排列强调顺序，(1,5)和(5,1)是两个不同的排列。
+# 
+# 494. 目标和
+给定一个非负整数数组，a1, a2, ..., an, 和一个目标数，S。现在你有两个符号 + 和 -。
+对于数组中的任意一个整数，你都可以从 + 或 -中选择一个符号添加在前面。
+返回可以使最终数组和为目标数 S 的所有添加符号的方法数。
+#如何转化为01背包问题呢。
+假设加法的总和为x，那么减法对应的总和就是sum - x。
+所以我们要求的是 x - (sum - x) = S
+x = (S + sum) / 2
+此时问题就转化为，装满容量为x背包，有几种方法;
+# 
+class Solution {
+public:
+    int findTargetSumWays(vector<int>& nums, int S) {
+        int sum = 0;
+        for (int i = 0; i < nums.size(); i++) sum += nums[i];
+        if (abs(S) > sum) return 0; // 此时没有方案
+        if ((S + sum) % 2 == 1) return 0; // 此时没有方案
+        int bagSize = (S + sum) / 2;
+        vector<int> dp(bagSize + 1, 0);
+        dp[0] = 1;
+        for (int i = 0; i < nums.size(); i++) {
+            for (int j = bagSize; j >= nums[i]; j--) {
+                dp[j] += dp[j - nums[i]];
+            }
+        }
+        return dp[bagSize];
+    }
+};
+#
+#
+# 474.一和零
+给你一个二进制字符串数组 strs 和两个整数 m 和 n 。
+请你找出并返回 strs 的最大子集的大小，该子集中 最多 有 m 个 0 和 n 个 1 。
+如果 x 的所有元素也是 y 的元素，集合 x 是集合 y 的 子集 。
+# 这道题的本质是有两个维度的01背包
+class Solution {
+public:
+    int findMaxForm(vector<string>& strs, int m, int n) {
+        vector<vector<int>> dp(m + 1, vector<int> (n + 1, 0)); // 默认初始化0
+        for (string str : strs) { // 遍历物品
+            int oneNum = 0, zeroNum = 0;
+            for (char c : str) {
+                if (c == '0') zeroNum++;
+                else oneNum++;
+            }
+            for (int i = m; i >= zeroNum; i--) { // 遍历背包容量且从后向前遍历！
+                for (int j = n; j >= oneNum; j--) {
+                    dp[i][j] = max(dp[i][j], dp[i - zeroNum][j - oneNum] + 1);
+                } 
+            }
+        }
+        return dp[m][n];
+    }
+};
+
+
+
+
+
+
+ 
+    
