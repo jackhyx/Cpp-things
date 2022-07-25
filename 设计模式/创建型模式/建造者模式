@@ -1,0 +1,182 @@
+// 建造者模式
+//Product.h 
+#ifndef _PRODUCT_H_ 
+#define _PRODUCT_H_ 
+
+class Product 
+{ 
+public: 
+Product(); 
+~Product(); 
+void ProducePart(); 
+protected:  // 可以被继承访问
+private: 
+}; 
+
+class ProductPart 
+{ 
+public: 
+ProductPart(); 
+~ProductPart(); 
+ProductPart* BuildPart(); 
+protected: 
+private: 
+}; 
+#endif //~_PRODUCT_H_
+
+
+//Component.cpp
+#include "Component.h" 
+// 一系列函数的定义
+Component::Component() 
+{ 
+} 
+
+Component::~Component() 
+{ 
+} 
+
+void Component::Add(const Component&
+com)
+{ 
+} 
+
+Component* Component::GetChild(int index) 
+{ 
+ return 0;
+} 
+
+void Component::Remove(const Component& 
+com)
+{ 
+}
+
+
+//Builder.h 
+#ifndef _BUILDER_H_ 
+#define _BUILDER_H_ 
+#include <string>
+using namespace std; 
+class Product; 
+// Builder基类
+class Builder 
+{ 
+public: 
+virtual ~Builder(); 
+// 都声明为纯虚函数
+virtual void BuildPartA(const string& 
+buildPara) = 0; 
+virtual void BuildPartB(const string& 
+buildPara) = 0; 
+virtual void BuildPartC(const string& 
+buildPara) = 0; 
+virtual Product* GetProduct() = 0;
+// 保护：可以被继承访问，不能被外部访问；
+protected: 
+Builder(); 
+private: 
+}; 
+
+// ConcreteBuilder : Builder子类
+class ConcreteBuilder:public Builder 
+{ 
+public: 
+ConcreteBuilder(); 
+~ConcreteBuilder(); 
+void BuildPartA(const string& 
+buildPara);
+void BuildPartB(const string& buildPara);
+void BuildPartC(const string& buildPara);
+Product* GetProduct(); 
+protected: 
+private: 
+}; 
+#endif //~_BUILDER_H_
+
+
+//Builder.cpp 
+#include "Builder.h" 
+#include "Product.h" 
+#include <iostream> 
+using namespace std; 
+// 实际实现
+Builder::Builder() 
+{ 
+} 
+Builder::~Builder() 
+{ 
+} 
+ConcreteBuilder::ConcreteBuilder() 
+{ 
+} 
+ConcreteBuilder::~ConcreteBuilder() 
+{ 
+} 
+void ConcreteBuilder::BuildPartA(const string& buildPara) 
+{ 
+ cout<<"Step1:Build PartA..."<<buildPara<<endl; 
+} 
+void ConcreteBuilder::BuildPartB(const string& buildPara) 
+{ 
+ cout<<"Step1:Build PartB..."<<buildPara<<endl; 
+} 
+void ConcreteBuilder::BuildPartC(const string& buildPara) 
+{ 
+ cout<<"Step1:Build PartC..."<<buildPara<<endl; 
+} 
+
+Product* ConcreteBuilder::GetProduct() 
+{ 
+ BuildPartA("pre-defined"); 
+ BuildPartB("pre-defined"); 
+ BuildPartC("pre-defined"); 
+return new Product(); 
+}
+
+//Director.h 
+#ifndef _DIRECTOR_H_ 
+#define _DIRECTOR_H_ 
+class Builder; 
+class Director 
+{ 
+public: 
+Director(Builder* bld); 
+~Director(); 
+void Construct();
+protected: 
+private: 
+Builder* _bld; 
+}; 
+#endif //~_DIRECTOR_H_
+
+
+//Director.cpp 
+#include "director.h" 
+#include "Builder.h" 
+Director::Director(Builder* bld)
+{ 
+_bld = bld; 
+} 
+Director::~Director() 
+{ 
+ 
+} 
+void Director::Construct() 
+{ 
+ _bld->BuildPartA("user-defined"); 
+ _bld->BuildPartB("user-defined"); 
+ _bld->BuildPartC("user-defined"); 
+}
+// 强调的是一步步创建对象，并通过相同的创建过程可以获得不同的结果对象
+//main.cpp 
+#include "Builder.h" 
+#include "Product.h" 
+#include "Director.h" 
+#include <iostream> 
+using namespace std; 
+int main(int argc,char* argv[])
+{ 
+Director* d = new Director(new ConcreteBuilder()); 
+d->Construct();
+return 0;
+}

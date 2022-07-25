@@ -1,0 +1,170 @@
+//享元工厂
+const std::string BLACKCHESS = "Black";
+const std::string WHITECHESS = "White";
+
+class FlyweightFactory {
+private:
+    std::map<std::string, std::shared_ptr<Flyweight>> m_mapFlyweight;
+public:
+    // strKey is defined class name or surname of class
+    std::shared_ptr<Flyweight> getFlyweight(const std::string strKey) {
+        //if find return FlyWeight object whose key is equal,otherwise new object and insert into map
+        if (m_mapFlyweight.end() != m_mapFlyweight.find(strKey))
+            return m_mapFlyweight[strKey];
+        if (strKey == BLACKCHESS) {
+            auto pointer = std::make_shared<SharedConcreteFlyweightBlack>();
+            m_mapFlyweight[strKey] = pointer;
+            return pointer;
+        } else if (strKey == WHITECHESS) {
+            auto pointer = std::make_shared<SharedConcreteFlyweightWhite>();
+            m_mapFlyweight[strKey] = pointer;
+            return pointer;
+        } else {
+            std::cout << "The key is Error!" << std::endl;
+            return nullptr;
+        }
+    }
+
+    size_t getFlyweightCount() {
+        return m_mapFlyweight.size();
+    }
+};
+
+
+int main() {
+    FlyweightFactory objFactory;
+    auto objBlack = objFactory.getFlyweight(BLACKCHESS);
+    objBlack->display(3, 5);
+
+    auto objBlack1 = objFactory.getFlyweight(BLACKCHESS);
+    objBlack1->display(1, 4);
+
+    std::cout << "Now,total chess count " << objFactory.getFlyweightCount() << std::endl;
+
+    auto objWhite = objFactory.getFlyweight(WHITECHESS);
+    objWhite->display(9, 9);
+
+    std::cout << "Now,total chess count " << objFactory.getFlyweightCount() << std::endl;
+
+    auto objWhite1 = objFactory.getFlyweight(WHITECHESS);
+    objWhite1->display(8, 8);
+
+    std::cout << "Now,total chess count " << objFactory.getFlyweightCount() << std::endl;
+
+    UnsharedConcreteFlyweightChessbox unshChessbox;
+    unshChessbox.display(1, 2);
+
+    std::cout << "Now,total chess count " << objFactory.getFlyweightCount() << std::endl;
+
+    return 0;
+    //运行结果如下：
+    //I am a black Chess,my coordinate is (3,5)
+    //I am a black Chess,my coordinate is (1,4)
+    //Now,total chess count 1
+    //I am a White Chess,my coordinate is (9,9).
+    //Now,total chess count 2
+    //I am a White Chess,my coordinate is (8,8).
+    //Now,total chess count 2
+    //I am a Yellow chessbox,my coordinate is (1,2)
+    //Now,total chess count 2
+}
+
+
+//Flyweight.h
+#ifndef FLYWEIGHT_H 
+#define FLYWEIGHT_H 
+#include <string> 
+#include <list> 
+typedef std::string STATE; 
+// 享元基类
+class Flyweight 
+{ 
+public: 
+virtual ~Flyweight(){} 
+STATE GetIntrinsicState(); 
+virtual void Operation(STATE& ExtrinsicState) = 0; 
+protected: 
+Flyweight(const STATE& state) 
+:m_State(state) 
+{ 
+} 
+private: 
+ STATE m_State;  // 享元基类维护的一个变量
+}; 
+//享元工厂
+class FlyweightFactory 
+{ 
+public: 
+ FlyweightFactory(){} 
+ ~FlyweightFactory(); 
+ Flyweight* GetFlyweight(const STATE& key); 
+private: 
+ std::list<Flyweight*> m_listFlyweight; 享元工厂维护的对象池
+// 
+class ConcreateFlyweight 
+ : public Flyweight 
+{ 
+public: 
+ ConcreateFlyweight(const STATE& state) 
+ : Flyweight(state) 
+ { 
+ } 
+ virtual ~ConcreateFlyweight(){} 
+ virtual void Operation(STATE& ExtrinsicState); 
+}; 
+#endif
+
+//Flyweight.cpp
+#include "FlyWeight.h" 
+#include <iostream> 
+inline STATE Flyweight::GetIntrinsicState() 
+{ 
+ return m_State; 
+} 
+FlyweightFactory::~FlyweightFactory() 
+{ 
+ std::list<Flyweight*>::iterator iter1, iter2, temp; 
+ for (iter1 = m_listFlyweight.begin(), iter2 = m_listFlyweight.end(); 
+ iter1 != iter2; 
+ ) 
+ { 
+ temp = iter1; 
+ ++iter1; 
+ delete (*temp); 
+ } 
+ m_listFlyweight.clear(); 
+} 
+
+Flyweight* FlyweightFactory::GetFlyweight(const STATE& key) 
+{ 
+ std::list<Flyweight*>::iterator iter1, iter2; 
+ for (iter1 = m_listFlyweight.begin(), iter2 = m_listFlyweight.end(); 
+ iter1 != iter2; 
+ ++iter1) 
+ { 
+ if ((*iter1)->GetIntrinsicState() == key) 
+ { 
+ std::cout << "The Flyweight:" << key << " already exits"<< std::endl; 
+ return (*iter1); 
+ } 
+ } 
+ std::cout << "Creating a new Flyweight:" << key << std::endl; 
+ Flyweight* flyweight = new ConcreateFlyweight(key); 
+ m_listFlyweight.push_back(flyweight); 
+} 
+
+void ConcreateFlyweight::Operation(STATE& ExtrinsicState) 
+{ 
+}
+
+#include "FlyWeight.h" 
+int main() 
+{ 
+ FlyweightFactory flyweightfactory; 
+ flyweightfactory.GetFlyweight("hello"); 
+ flyweightfactory.GetFlyweight("world"); 
+ flyweightfactory.GetFlyweight("hello"); 
+ system("pause"); 
+ return 0; 
+}
+

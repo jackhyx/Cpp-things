@@ -1,0 +1,113 @@
+// 装饰器模式
+
+#include <bits/stdc++.h>
+
+//
+//装饰模式
+//关键代码：
+// 1.Component 类充当抽象角色，不应该具体实现
+// 2.修饰类引用和继承 Component 类，具体扩展类重写父类方法。
+//
+
+using namespace std;
+
+//抽象构件（Component）角色：给出一个抽象接口，以规范准备接收附加责任的对象。
+class Component {
+public:
+    virtual ~Component() = default;
+
+    virtual void configuration() = 0;
+};
+
+//具体构件（Concrete Component）角色：定义一个将要接收附加责任的类。
+class Car : public Component {
+public:
+    void configuration() override {
+        std::cout << "A Car" << std::endl;
+    }
+};
+
+//装饰（Decorator）角色：持有一个构件（Component）对象的实例，
+// 并实现一个与抽象构件接口一致的接口。
+class DecorateCar : public Component {
+public:
+    DecorateCar(std::shared_ptr<Component> car) : m_pCar(car) {}
+
+    void configuration() override {
+        m_pCar->configuration();
+    }
+
+private:
+    std::shared_ptr<Component> m_pCar;
+};
+
+//具体装饰（Concrete Decorator）角色：负责给构件对象添加上附加的责任。
+class DecorateLED : public DecorateCar {
+public:
+    DecorateLED(std::shared_ptr<Component> car) : DecorateCar(car) {}
+
+    void configuration() override {
+        DecorateCar::configuration();
+        //or add other somthing
+        addLED();
+    }
+
+private:
+    void addLED() {
+        std::cout << "Install LED" << std::endl;
+    }
+};
+
+//具体装饰（Concrete Decorator）角色：负责给构件对象添加上附加的责任。
+class DecoratePC : public DecorateCar {
+public:
+    DecoratePC(std::shared_ptr<Component> car) : DecorateCar(car) {}
+
+    void configuration() override {
+        DecorateCar::configuration();
+        addPC();
+    }
+
+private:
+    void addPC() {
+        std::cout << "Install PC" << std::endl;
+    }
+};
+
+//具体装饰（Concrete Decorator）角色：负责给构件对象添加上附加的责任。
+class DecorateEPB : public DecorateCar {
+public:
+    DecorateEPB(std::shared_ptr<Component> car) : DecorateCar(car) {}
+
+    void configuration() override {
+        DecorateCar::configuration();
+        addEPB();
+    }
+
+private:
+    void addEPB() {
+        std::cout << "Install Electrical Park Brake" << std::endl;
+    }
+};
+
+int main() {
+    std::shared_ptr<Car> car = std::make_shared<Car>();
+    std::shared_ptr<DecorateLED> ledCar = std::make_shared<DecorateLED>(car);//装饰一层
+    ledCar->configuration();
+
+    std::cout << std::string(30, '-') << std::endl;
+
+    std::shared_ptr<DecoratePC> pcCar = std::make_shared<DecoratePC>(ledCar);//装饰二层
+    std::shared_ptr<DecorateEPB> epbCar = std::make_shared<DecorateEPB>(pcCar);//装饰三层
+    epbCar->configuration();
+
+    return 0;
+    //运行结果如下:
+    //A Car
+    //Install LED
+    //------------------------------
+    //A Car
+    //Install LED
+    //Install PC
+    //Install Electrical Park Brake
+}

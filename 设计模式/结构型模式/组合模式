@@ -1,0 +1,205 @@
+//Composite.h
+#ifndef COMPOSITE_H 
+#define COMPOSITE_H 
+#include <list> 
+// 组合中的抽象基类
+class Component 
+{ 
+public: 
+ Component(){} 
+ virtual ~Component(){} 
+ // 纯虚函数,只提供接口,没有默认的实现
+ virtual void Operation() = 0; 
+ // 虚函数,提供接口,有默认的实现就是什么都不做
+ virtual void Add(Component* pChild); 
+ virtual void Remove(Component* pChild); 
+ virtual Component* GetChild(int nIndex); 
+}; 
+// 派生自 Component,是其中的叶子组件的基类
+class Leaf 
+ : public Component 
+{ 
+public: 
+ Leaf(){} 
+ virtual ~Leaf(){} 
+ virtual void Operation(); 
+}; 
+// 派生自 Component,是其中的含有子件的组件的基类
+class Composite 
+ : public Component 
+{ 
+public: 
+ Composite(){} 
+ virtual ~Composite(); 
+ virtual void Operation(); 
+ virtual void Add(Component* pChild); 
+ virtual void Remove(Component* pChild); 
+ virtual Component* GetChild(int nIndex); 
+private: 
+ // 采用 list 容器去保存子组件
+ std::list<Component*> m_ListOfComponent; 
+}; 
+#endif
+
+//Composite.cpp 
+#include "Composite.h" 
+#include <iostream> 
+#include <algorithm> 
+/*------------------------------------------------------------------- 
+ Component 成员函数的实现
+-------------------------------------------------------------------*/
+void Component::Add(Component* pChild) 
+{ 
+} 
+void Component::Remove(Component* pChild) 
+{ 
+} 
+Component* Component::GetChild(int nIndex) 
+{ 
+ return NULL; 
+} 
+/*------------------------------------------------------------------- 
+ Leaf 成员函数的实现
+-------------------------------------------------------------------*/
+void Leaf::Operation() 
+{ 
+ std::cout << "Operation by leaf\n"; 
+} 
+/*------------------------------------------------------------------- 
+ Composite 成员函数的实现
+-------------------------------------------------------------------*/
+Composite::~Composite() 
+{ 
+ std::list<Component*>::iterator iter1, iter2, temp; 
+PDF created with pdfFactory trial version www.pdffactory.com
+ for (iter1 = m_ListOfComponent.begin(), iter2 = m_ListOfComponent.end(); 
+ iter1 != iter2; 
+ ) 
+ { 
+ temp = iter1; 
+ ++iter1; 
+ delete (*temp); 
+ } 
+} 
+void Composite::Add(Component* pChild) 
+{ 
+ m_ListOfComponent.push_back(pChild); 
+} 
+void Composite::Remove(Component* pChild) 
+{ 
+ std::list<Component*>::iterator iter; 
+ iter = find(m_ListOfComponent.begin(), m_ListOfComponent.end(), pChild); 
+ if (m_ListOfComponent.end() != iter) 
+ { 
+ m_ListOfComponent.erase(iter); 
+ } 
+} 
+Component* Composite::GetChild(int nIndex) 
+{ 
+ if (nIndex <= 0 || nIndex > m_ListOfComponent.size()) 
+ return NULL; 
+ std::list<Component*>::iterator iter1, iter2; 
+ int i; 
+ for (i = 1, iter1 = m_ListOfComponent.begin(), iter2 = m_ListOfComponent.
+end(); 
+ iter1 != iter2; 
+ ++iter1, ++i) 
+ { 
+ if (i == nIndex) 
+ break; 
+ } 
+ return *iter1; 
+} 
+
+void Composite::Operation() 
+{ 
+ std::cout << "Operation by Composite\n"; 
+ std::list<Component*>::iterator iter1, iter2; 
+ for (iter1 = m_ListOfComponent.begin(), iter2 = m_ListOfComponent.end(); 
+ iter1 != iter2; 
+ ++iter1) 
+ { 
+ (*iter1)->Operation(); 
+ } 
+}
+
+#include "Composite.h" 
+#include <stdlib.h> 
+int main() 
+{ 
+ Leaf *pLeaf1 = new Leaf(); 
+ Leaf *pLeaf2 = new Leaf(); 
+ Composite* pComposite = new Composite; 
+ pComposite->Add(pLeaf1); 
+ pComposite->Add(pLeaf2); 
+ pComposite->Operation(); 
+ pComposite->GetChild(2)->Operation(); 
+ delete pComposite; 
+}
+
+
+#include <bits/stdc++.h>
+
+//抽象享元基类
+class Flyweight {
+public:
+    virtual void display(const int iX, const int iY) = 0;
+
+    Flyweight() = default;
+
+    virtual ~Flyweight() = default;
+
+protected:
+    std::string m_strColor;
+};
+
+
+//共享类
+class SharedConcreteFlyweightWhite : public Flyweight {
+public:
+    void display(const int iX, const int iY) override {
+        std::cout << "I am a " << m_strColor
+                  << " Chess,my coordinate is (" << iX << "," << iY << ")."
+                  << std::endl;
+    }
+
+    SharedConcreteFlyweightWhite() {
+        m_strColor = "White";
+    }
+
+    ~SharedConcreteFlyweightWhite() = default;
+};
+
+
+class SharedConcreteFlyweightBlack : public Flyweight {
+public:
+    void display(const int iX, const int iY) override {
+        std::cout << "I am a black Chess,my coordinate is ("
+                  << iX << "," << iY << ")" << std::endl;
+    }
+
+    SharedConcreteFlyweightBlack() : Flyweight() {
+        m_strColor = "Black";
+    }
+
+    ~SharedConcreteFlyweightBlack() = default;
+};
+
+
+//非享元角色
+class UnsharedConcreteFlyweightChessbox : public Flyweight {
+public:
+    void display(const int iX, const int iY) override {
+        std::cout << "I am a " << m_strColor
+                  << " chessbox,my coordinate is ("
+                  << iX << "," << iY << ")" << std::endl;
+    }
+
+    UnsharedConcreteFlyweightChessbox() : Flyweight() {
+        m_strColor = "Yellow";
+    }
+
+    ~UnsharedConcreteFlyweightChessbox() = default;
+};
+
+
