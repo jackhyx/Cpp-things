@@ -1115,3 +1115,559 @@ int main()
 {
     test01();
 }
+
+
+//Originator.h
+#ifndef _ORIGINATOR_H_
+#define _ORIGINATOR_H_
+#include <string>
+
+#include "Memento.h"
+    class Originator
+    {
+    public:
+        std::string getState() const
+        {
+            return state;
+        }
+
+        void setState(const std::string& state)
+        {
+            this->state = state;
+        }
+
+        //保存一个状态对象Memento   即用当前状态的值去创建一个Memento然后将其返回
+        Memento SaveStateMemento()
+        {
+            return Memento(state);
+        }
+
+        //通过备忘录对象，恢复状态
+        void getStateFromMemento(Memento memento)
+        {
+            state = memento.getState();
+        }
+    private:
+        std::string state;
+    };
+#endif
+
+//Memento.h
+#ifndef _MEMENTO_H_
+#define _MEMENTO_H_
+#include <string>
+    class Memento
+    {
+    public:
+        explicit Memento(const std::string& state)
+                : state(state)
+        {
+        }
+
+        std::string getState() const
+        {
+            return state;
+        }
+
+    private:
+        std::string state;
+    };
+
+#endif
+
+//Caretaker.h
+#ifndef _CARETAKER_H_
+#define _CARETAKER_H_
+
+#include <vector>
+#include "Memento.h"
+    class Caretaker
+    {
+    public:
+        void add(Memento memento)
+        {
+            mementoList.push_back(memento);
+        }
+
+        //获取到第index个Originator的备忘录对象（即备忘录状态）
+        Memento get(int index)
+        {
+            return mementoList[index];
+        }
+    private:
+        //在mementoList中会有很多备忘录对象
+        std::vector<Memento> mementoList;
+    };
+#endif
+
+//main.h
+#include <iostream>
+#include "Originator.h"
+#include "Caretaker.h"
+    using namespace std;
+    int main(int argc, char* argv[])
+    {
+        Originator originator;
+        Caretaker caretaker;
+        originator.setState("状态1，攻击力为100");
+
+        //保存当前状态
+        caretaker.add(originator.SaveStateMemento());
+
+        //受到debuff，攻击力下降
+        originator.setState("状态2，攻击力为80");
+        //保存状态
+        caretaker.add(originator.SaveStateMemento());
+
+        cout << "当前的状态：" << originator.getState()<<endl;
+        cout << "debuff时间结束，回到状态1" << endl;
+        originator.getStateFromMemento(caretaker.get(0));
+        cout << "恢复到状态1后的状态：" << originator.getState();
+        return 0;
+    }
+
+#include <bits/stdc++.h>
+
+//
+//备忘录模式
+//关键代码：Memento类、Originator类、Caretaker类；
+// Originator类不与Memento类耦合，而是与Caretaker类耦合
+//
+
+
+//需要保存的信息
+//此处将需要保存的信息提取出来放在一个结构体中
+//也可以不用放在结构体中，直接作为类的成员变量
+    typedef struct {
+        int nHp;//血量
+        int nMp;//蓝量
+        int nAttack;//攻击
+    }GameValue;
+
+
+//备忘录类
+    class Memento{
+    public:
+        Memento(const GameValue& gameValue):m_gameValue(gameValue){}
+
+        //函数前后均加const
+        //前const:返回的变量不可修改
+        //后const:该函数readonly,表示该类的this指针为const类型，
+        // 不能改变类的成员变量的值
+        const GameValue& getValue() const{
+            return m_gameValue;
+        }
+
+
+        //Memento() = delete;
+        //Memento(const Memento &) = delete;
+        //Memento &operator=(const Memento &) = delete;
+
+    private:
+        GameValue m_gameValue;
+    };
+
+//管理者角色
+    class Caretaker
+    {
+    public:
+        const std::shared_ptr<Memento> GetState(const std::string& key) {
+            return mData[key];
+        }
+        void SetState(const std::string& key,
+                      std::shared_ptr<Memento> pMemento) {
+            mData[key] = pMemento;
+        }
+
+    private:
+        //此处考虑在map中存储指针,而非直接存储对象
+        std::map<std::string,std::shared_ptr<Memento>> mData;
+    };
+
+//发起人角色
+    class Hero{
+    public:
+        Hero()
+                :m_gameValue{100,100,100}{
+        }
+
+        Hero(const GameValue& gameValue)
+                :m_gameValue(gameValue){
+        }
+
+        //保存当前信息
+        void saveState(const std::string& key) {
+            m_Caretaker.SetState(key, std::make_shared<Memento>(m_gameValue));
+        }
+
+        //恢复信息
+        const void resumeState(const std::string& key) {
+            m_gameValue = m_Caretaker.GetState(key)->getValue();
+        }
+
+        void battle()
+        {
+            m_gameValue.nHp = rand()%100;
+            m_gameValue.nMp = rand()%100;
+            m_gameValue.nAttack = rand()%100;
+        }
+
+        void showState() {
+            std::cout<<"血量："<<m_gameValue.nHp<<std::endl
+                     <<"蓝量："<<m_gameValue.nMp<<std::endl
+                     <<"攻击："<<m_gameValue.nAttack<<std::endl;
+        }
+
+    private:
+        GameValue m_gameValue;
+        Caretaker m_Caretaker;//常规对象,没有必要用指针
+    };
+
+    int main()
+    {
+        Hero hero;
+
+        std::cout<<"----战斗前-----"<<std::endl;
+        hero.showState();
+        std::cout<<std::endl;
+        hero.saveState("战斗前");
+
+        hero.battle();
+        std::cout<<"-----战斗1后-----"<<std::endl;
+        hero.showState();
+        std::cout<<std::endl;
+        hero.saveState("战斗1后");
+
+        hero.battle();
+        std::cout<<"-----战斗2后-----"<<std::endl;
+        hero.showState();
+        hero.saveState("战斗2后");
+        std::cout<<std::endl;
+
+        hero.battle();
+        std::cout<<"-----战斗3后-----"<<std::endl;
+        hero.showState();
+        hero.saveState("战斗3后");
+        std::cout<<std::endl;
+
+        hero.resumeState("战斗1后");
+        std::cout<<"-----恢复战斗1结果-----"<<std::endl;
+        hero.showState();
+        std::cout<<std::endl;
+
+        hero.resumeState("战斗前");
+        std::cout<<"-----恢复战斗前-----"<<std::endl;
+        hero.showState();
+        std::cout<<std::endl;
+
+        return 0;
+        //运行结果如下:
+        //----战斗前-----
+        //血量：100
+        //蓝量：100
+        //攻击：100
+        //
+        //-----战斗1后-----
+        //血量：83
+        //蓝量：86
+        //攻击：77
+        //
+        //-----战斗2后-----
+        //血量：15
+        //蓝量：93
+        //攻击：35
+        //
+        //-----战斗3后-----
+        //血量：86
+        //蓝量：92
+        //攻击：49
+        //
+        //-----恢复战斗1结果-----
+        //血量：83
+        //蓝量：86
+        //攻击：77
+        //
+        //-----恢复战斗前-----
+        //血量：100
+        //蓝量：100
+        //攻击：100
+    }
+
+
+//命令模式
+#include <iostream>
+#include <queue>
+#include <Windows.h>
+    using namespace std;
+
+//协议处理类    （请求类）
+    class HandleClinetProtocal
+    {
+    public:
+        //处理增加金币
+        void AddMoney()
+        {
+            cout << "给玩家增加金币" << endl;
+        }
+        //处理增加钻石
+        void AddDiamond()
+        {
+            cout << "给玩家增加钻石" << endl;
+        }
+        //处理玩家装备
+        void AddEquipment()
+        {
+            cout << "给玩家穿装备" << endl;
+        }
+        //玩家升级
+        void AddLevel()
+        {
+            cout << "给玩家升级" << endl;
+        }
+    };
+
+//命令接口
+    class AbstractCommand
+    {
+    public:
+        //相当于execute（）
+        virtual void handle() = 0;
+    };
+
+
+//下面是把每个功能都封装为一个请求对象
+//处理增加金币请求
+    class AddMoneyCommand:public AbstractCommand
+    {
+    public:
+        AddMoneyCommand(HandleClinetProtocal* protocal)
+        {
+            this->pProtocol = protocal;
+        }
+        virtual void handle()
+        {
+            this->pProtocol->AddMoney();
+        }
+    public:
+        HandleClinetProtocal* pProtocol;
+    };
+
+//处理增加钻石请求
+    class AddDiamondCommand :public AbstractCommand
+    {
+    public:
+        AddDiamondCommand(HandleClinetProtocal* protocal)
+        {
+            this->pProtocol = protocal;
+        }
+        virtual void handle()
+        {
+            this->pProtocol->AddDiamond();
+        }
+    public:
+        HandleClinetProtocal* pProtocol;
+    };
+
+//处理玩家装备请求
+    class AddEquipmentCommand :public AbstractCommand
+    {
+    public:
+        AddEquipmentCommand(HandleClinetProtocal* protocal)
+        {
+            this->pProtocol = protocal;
+        }
+        virtual void handle()
+        {
+            this->pProtocol->AddEquipment();
+        }
+    public:
+        HandleClinetProtocal* pProtocol;
+    };
+
+//处理玩家升级请求
+    class AddLevelCommand :public AbstractCommand
+    {
+    public:
+        AddLevelCommand(HandleClinetProtocal* protocal)
+        {
+            this->pProtocol = protocal;
+        }
+        virtual void handle()
+        {
+            this->pProtocol->AddLevel();
+        }
+    public:
+        HandleClinetProtocal* pProtocol;
+    };
+
+//服务器程序   （命令调用类）
+    class Server
+    {
+    public:
+        //将请求对象放入处理队列
+        void addRequest(AbstractCommand* command)
+        {
+            mCommands.push(command);
+        }
+
+        //启动处理程序
+        void startHandle()
+        {
+            while (!mCommands.empty())
+            {
+                Sleep(2000);
+                AbstractCommand* command = mCommands.front();
+                command->handle();
+                mCommands.pop();
+            }
+        }
+        queue<AbstractCommand*> mCommands;
+    };
+
+    void test01()
+    {
+        HandleClinetProtocal* protocal = new HandleClinetProtocal;
+        //客户端增加金币的请求
+        AbstractCommand* addmoney = new AddMoneyCommand(protocal);
+        //客户端增加钻石的请求
+        AbstractCommand* adddiamond = new AddDiamondCommand(protocal);
+        //客户端穿装备的请求
+        AbstractCommand* addequipment = new AddEquipmentCommand(protocal);
+        //客户端升级请求
+        AbstractCommand* addlevel = new AddLevelCommand(protocal);
+
+        //将客户端的请求加入到请求队列中
+        Server* server = new Server;
+        server->addRequest(addmoney);
+        server->addRequest(adddiamond);
+        server->addRequest(addequipment);
+        server->addRequest(addlevel);
+
+        //服务器开始处理请求
+        server->startHandle();
+    }
+
+
+    int main()
+    {
+        test01();
+        return 0;
+    }
+
+
+#include <iostream>
+#include <list>
+
+    class Man;
+    class Woman;
+    using namespace std;
+
+    class Action
+    {
+    public:
+        virtual void getManResult(Man* man) =0;
+        virtual void getWomanResult(Woman* woman) =0;
+
+    private:
+    };
+
+    class Success:public Action
+    {
+    public:
+        void getManResult(Man* man) override
+        {
+            cout << "男人的给的评价该歌手是很成功" << endl;
+        }
+
+        void getWomanResult(Woman* woman) override
+        {
+            cout << "女人的给的评价该歌手是很成功" << endl;
+        }
+    };
+
+    class Fail :public Action
+    {
+    public:
+        void getManResult(Man* man) override
+        {
+            cout << "男人的给的评价该歌手是失败" << endl;
+        }
+
+        void getWomanResult(Woman* woman) override
+        {
+            cout << "女人的给的评价该歌手是失败" << endl;
+        }
+    };
+
+    class Person
+    {
+    public:
+        //提供一个方法让访问者可以访问
+        virtual void accept(Action* action) = 0;
+    };
+
+//这里用用到了双分派，即首先在客户端程序中，将具体的状态作为参数传递进Man中（第一次分派）
+//然后在Man中调用作为参数的“具体方法” getManResult同时将自己作为参数传入完成第二次分派
+    class Man:public Person
+    {
+    public:
+        void accept(Action* action) override
+        {
+            action->getManResult(this);
+        }
+    };
+
+    class Woman: public Person
+    {
+    public:
+        void accept(Action* action) override
+        {
+            action->getWomanResult(this);
+        }
+    };
+
+//数据结构，管理很多人（Man、Woman）用来装符合某一个评价的所有人
+    class ObjectStructure
+    {
+    public:
+        //添加到list
+        void attach(Person* p)
+        {
+            persons.push_back(p);
+        }
+        //移除
+        void detach(Person* p)
+        {
+            persons.remove(p);
+            delete p;
+        }
+
+        //显示测评情况
+        void display(Action* action)
+        {
+            for (auto value : persons)
+            {
+                value->accept(action);
+            }
+        }
+    private:
+        list<Person*> persons;
+    };
+
+    int main(int argc, char* argv[])
+    {
+        //创建ObjectStructure（可以创建很多个不同的ObjectStructure来代表不同评价，然后把同样评价的人放到一个ObjectStructure中）
+        auto* objectStructure = new ObjectStructure;
+        objectStructure->attach(new Man);
+        objectStructure->attach(new Woman);
+
+        //假如歌手获得成功
+        auto* success = new Success;
+        objectStructure->display(success);
+        cout << "=======================" << endl;
+        //假如歌手失败了
+        Fail* fail = new Fail;
+        objectStructure->display(fail);
+        return 0;
+    }
+
