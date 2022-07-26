@@ -1,0 +1,288 @@
+### * Strategy 模式（策略模式) *
+
+* 策略模式是指定义一系列的算法，并将每一个算法封装起来，而且使它们可以互相替换
+* 使得算法可以独立于使用它的客户端而变化。也就是说这些算法所完成的功能类型是一样的，对外接口也是一样的
+* 只是不同的策略使得环境角色表现出不同的行为。 
+* 策略模式使用的就是面向对象的继承和多态机制，从而实现同一行为在不同场景下具备不同实现。 
+* 策略模式本质：分离算法，选择实现
+
+#### 策略模式涉及到三个角色：
+
+* 环境(Context)角色：持有一个Strategy的引用。用来操作策略的上下文环境，屏蔽高层模块（客户端）对策略，算法的直接访问，封装可能存在的变化。 
+* 抽象策略(Strategy)角色：这是一个抽象角色，通常由一个接口或抽象类实现。此角色给出所有的具体策略类所需的接口。 
+* 具体策略(ConcreteStrategy)角色：具体的策略或算法实现。 
+* 策略模式中的上下文环境Context，其职责是隔离客户端与策略类的耦合，让客户端完全与上下文环境沟通，无需关系具体策略
+* 为了避免客户端内部直接自己指定要哪种策略而造成客户端与具体策略类耦合，
+* 一般可以通过简单工厂模式将具体策略的创建与客户端进行隔离，或者是通过策略枚举将上下文环境与具体策略类融合在一起，简化代码。当具体策略相对稳定时，推荐使用策略枚举简化代码
+
+
+#### 工厂模式和策略模式对比
+上面代码中，给人的感觉是和简单工厂模式一样，确实，在模式结构上，两者很相似(都是通过多态去减少代码的耦合度)。可以看下两种模式的UML图.
+那两者区别呢？
+#### 用途不一样
+* 工厂模式是创建型模式，它的作用是创建对象；而策略模式是行为型模式，它的作用是让一个对象在许多行为中选择一种行为；
+
+#### 关注点不一样
+* 工厂模式关注对象创建；策略模式关注行为的封装；
+
+#### 解决不同的问题
+* 工厂模式是创建型的设计模式，它接受指令，创建出符合要求的实例
+* 它主要解决的是资源的统一分发，将对象的创建完全独立出来，让对象的创建和具体的使用客户无关
+* 主要应用在多数据库选择，类库文件加载等。
+
+* 策略模式是为了解决的是策略的切换与扩展，更简洁的说是定义策略族，分别封装起来，让他们之间可以相互替换
+* 策略模式让策略的变化独立于使用策略的客户。
+
+工厂相当于黑盒子，策略相当于白盒子；
+
+工厂模式中只管生产实例，具体怎么使用工厂实例由调用方决定，策略模式是将生成实例的使用策略放在策略类中配置后才提供调用方使用。 工厂模式调用方可以直接调用工厂实例的方法属性等，策略模式不能直接调用实例的方法属性，需要在策略类中封装策略后调用。
+
+如果从使用这两种模式的角度来看的话，我们会发现在简单工厂模式中我们只需要传递相应的条件就能得到想要的一个对象，然后通过这个对象实现算法的操作[这个过程不会暴露创建逻辑。就好像，你去买汽车，直接交钱买就行了，不用去管，这个车在工厂里是如何组装起来的]。
+而策略模式，使用时必须首先创建一个想使用的类对象，然后将该对象最为参数传递进去，通过该对象调用不同的算法。在简单工厂模式中实现了通过条件选取一个类去实例化对象，策略模式则将选取相应对象的工作交给模式的使用者，它本身不去做选取工作。
+或者说，两个的差别很微妙,Factory是直接创建具体的对象并用该对象去执行相应的动作，而Context将这个操作给了Context类，没有创建具体的对象，实现的代码的进一步封装，客户端代码并不需要知道具体的实现过程。
+```
+ 工厂模式：
+ Factory:
+ if type=="a":
+ return new A
+ if type=="b":
+ return new B
+
+ obj = new Factory(type)
+
+ 结果是 obj is A 或者 obj is B
+
+ 策略模式：
+ Strategy:
+ if type=="a":
+ this.attribute = new A
+ return this
+ if type=="b":
+ this.attribute = new B
+ return this
+
+ obj = new Strategy(type)
+
+ 结果是 obj has A() 或者 obj has B()
+
+
+
+```
+#### 总结
+##### 优点
+* 算法可以自由切换； 
+* 有效避免多重条件判断，增强了封装性，简化了操作，降低出错概率； 
+* 扩展性良好，策略类遵循里氏替换原则，可以很方便地进行策略扩展；
+
+##### 缺点 
+* 策略类数量会增多; 
+* 所有策略类都必须对外暴露，以便客户端能进行选择可以与简单工厂模式相结合，避免与客户端的耦合；
+
+##### 使用场景
+* 针对同一类型问题，有多种处理方式，每一种都能独立解决问题，区分他们的只是他们实际的行为； 
+* 算法需要自由切换的场景； 
+* 需要屏蔽算法规则的场景
+
+
+
+##### 传统的策略模式实现
+```
+#include <bits/stdc++.h>
+
+//
+//策略模式 采用传统方式实现:class or 模板
+//
+
+using std::cout;
+using std::endl;
+
+//抽象策略类，提供一个接口
+class Hurt {
+public:
+    virtual void blood() = 0;
+};
+
+//具体的策略实现类，具体实现接口， Adc持续普通攻击
+class AdcHurt : public Hurt {
+public:
+    void blood() override {
+        cout << "Adc hurt, Blood loss" << endl;
+    }
+};
+
+//具体的策略实现类，具体实现接口， Apc技能攻击
+class ApcHurt : public Hurt {
+public:
+    void blood() override {
+        cout << "Apc Hurt, Blood loss" << endl;
+    }
+};
+
+//================================================//
+//类指针方式
+//环境角色类， 游戏角色战士，传入一个策略类指针参数
+//采用了shared_ptr,如果采用unique_ptr呢？两者意义是否一样？
+class Soldier {
+public:
+    Soldier(std::shared_ptr<Hurt> hurt) : m_pHurt(hurt) {
+    }
+
+    //在不同的策略下，该游戏角色表现出不同的攻击
+    void attack() {
+        m_pHurt->blood();
+    }
+
+private:
+    std::shared_ptr<Hurt> m_pHurt;
+};
+
+//================================================//
+//策略标签+简单工厂模式+策略模式
+//定义策略标签
+typedef enum {
+    Hurt_Type_Adc,
+    Hurt_Type_Apc,
+    Hurt_Type_Num
+} HurtType;
+
+//环境角色类， 游戏角色法师，传入一个策略标签参数。
+class Mage {
+public:
+    Mage(HurtType type) {
+        switch (type) {
+            case Hurt_Type_Adc:
+                m_pHurt = std::make_shared<AdcHurt>();
+                break;
+            case Hurt_Type_Apc:
+                m_pHurt = std::make_shared<ApcHurt>();
+                break;
+            default:
+                break;
+        }
+    }
+
+    void attack() {
+        m_pHurt->blood();
+    }
+
+private:
+    std::shared_ptr<Hurt> m_pHurt;
+};
+
+//================================================//
+//模板实现
+//环境角色类， 游戏角色弓箭手，实现模板传递策略。
+template<typename T>
+class Archer {
+public:
+    void attack() {
+        m_hurt.blood();
+    }
+
+private:
+    T m_hurt;
+};
+
+int main() {
+
+    //传入策略类指针
+    Soldier soldier(std::make_shared<AdcHurt>());
+    soldier.attack();
+    //运行结果:
+    //Adc hurt, Blood loss
+
+    //传入策略标签,具体策略对象的创建在上下文环境Context中实现
+    std::shared_ptr<Mage> pMage = std::make_shared<Mage>(HurtType::Hurt_Type_Adc);
+    pMage->attack();
+    //运行结果:
+    //Adc hurt, Blood loss
+
+
+    //采用模板实现
+    Archer<ApcHurt> *arc = new Archer<ApcHurt>;
+    arc->attack();
+    delete arc;
+    arc = nullptr;
+    //运行结果:
+    //Apc Hurt, Blood loss
+
+    //基于智能指针的模板
+    std::shared_ptr<Archer<AdcHurt>> pArc = std::make_shared<Archer<AdcHurt>>();
+    pArc->attack();
+    //运行结果:
+    //Adc hurt, Blood loss
+
+    return 0;
+}
+
+```
+##### 使用函数指针实现策略模式
+```
+#include <bits/stdc++.h>
+
+//
+//策略模式 采用函数指针 or std::function实现
+//
+
+
+void adcHurt() {
+    std::cout << "Adc Hurt" << std::endl;
+}
+
+void apcHurt() {
+    std::cout << "Apc Hurt" << std::endl;
+}
+
+//环境角色类， 使用传统的函数指针
+class Soldier {
+public:
+    typedef void (*Function)();
+
+    Soldier(Function fun) : m_fun(fun) {
+    }
+
+    void attack() {
+        m_fun();
+    }
+
+private:
+    Function m_fun;
+};
+
+//环境角色类， 使用std::function<>
+class Mage {
+public:
+    typedef std::function<void()> Function;
+
+    Mage(Function fun) : m_fun(fun) {
+    }
+
+    void attack() {
+        m_fun();
+    }
+
+private:
+    Function m_fun;
+};
+
+int main() {
+    //函数指针实现
+    Soldier *soldier = new Soldier(apcHurt);
+    soldier->attack();
+    delete soldier;
+    soldier = nullptr;
+    //运行结果:
+    //Apc Hurt
+
+    //std::function实现
+    std::shared_ptr<Mage> pMage = std::make_shared<Mage>(adcHurt);
+    pMage->attack();
+    //运行结果:
+    //Adc Hurt
+
+
+    return 0;
+}
+
+```
+
