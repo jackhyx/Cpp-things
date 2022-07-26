@@ -1,137 +1,214 @@
-*Chain of Responsibility 模式（责任链模式）*
-责任链模式（Chain of Responsibility Pattern）为请求创建了一个接收者对象的链。
-这种模式给予请求的类型，对请求的发送者和接收者进行解耦。这种类型的设计模式属于行为型模式。
+### *Chain of Responsibility 模式（责任链模式）*
+* 为了避免将一个请求的发送者与接受者耦合在一起，让多个对象都有机会处理请求。
+* 将接受请求的对象接成一条链，当有请求发生时，可以沿着这条链传递请求，直到有一个对象能够处理它为止。 
+* 这个过程实际上就是一个递归调用 
+* 职责链可以是一条直线，一个环或者树形结构，常见的是直线型，即沿着一条单向的链来传递请求
+* 客户无需关心请求的处理细节以及请求的传递，只需将请求发送到链上。将请求的发送者和处理者解耦，是职责链模式的动机。
 
-在这种模式中，通常每个接收者都包含对另一个接收者的引用。如果一个对象不能处理该请求，那么它会把相同的请求传给下一个接收者，依此类推。
+#### 要点
+* 有多个对象共同对一个任务进行处理; 
+* 这些对象使用链式存储结构，形成一个链，每个对象知道自己的下一个对象; 
+* 通常每个接收者都包含对另一个接收者的引用。如果一个对象不能处理该请求，那么它会把相同的请求传给下一个接收者，依此类推。
+* 一个对象对任务进行处理，可以添加一些操作后将对象传递个下一个任务。也可以在此对象上结束任务的处理，并结束任务; 
+* 客户端负责组装链式结构，但是客户端不需要关心最终是谁来处理了任务;
 
-* 主要解决：职责链上的处理者负责处理请求，客户只需要将请求发送到职责链上即可，无须关心请求的处理细节和请求的传递，所以职责链将请求的发送者和请求的处理者解耦了。
+#### 职责链模式主要包含以下角色：
+* 抽象处理者(Handler)角色：它定义了一个处理请求的接口，一般设计为抽象类，由于不同的具体处理者处理请求的方式不同，因此在其中定义了抽象请求处理方法。每一个处理者的下家还是一个处理者，故在抽象处理者中定义了一个抽象处理者类型的对象作为其对下家的引用，通过该引用，处理者可以连成一条链。如果需要，接口可以定义出一个方法以设定和返回对下家的引用；
+* 具体处理者(ConcreteHandler)角色：它是抽象处理者的子类，可以处理用户请求，实现了抽象处理方法。处理之前要进行判断，看看是否有相应的处理权限，若有则处理请求，若无则转发请求给下家。
+* 客户类(Client)角色：创建处理链，并向链头的具体处理者对象提交请求，它不关心处理细节和请求的传递过程
+
+#### 主要解决
+职责链上的处理者负责处理请求，客户只需要将请求发送到职责链上即可，无须关心请求的处理细节和请求的传递，所以职责链将请求的发送者和请求的处理者解耦了。
 
 * 何时使用：在处理消息的时候以过滤很多道。
+
 #### 总结：
 
-将请求和处理分开，实现解耦，提高系统的灵活性
-简化了对象，使对象不需要知道链的结构
-调试不方便。采用了类似递归的方式，调试时逻辑可能比较复杂
-最佳应用场景：有多个对象可以处理同一个请求时，比如：多级请求、请假/加薪等审批流程、Java Web中Tomcat对Encoding的处理、拦截器
+##### 优点
+* 请求者和接受者松散耦合：一个对象无须知道是其他哪一个对象处理了其请求，仅需知道该请求会被处理即可，接受者和发送者都没有对方的明确信息，每个职责对象只负责自己的职责范围，链中对象不需要知道链的结构，各个组件间完全解耦，由客户端负责链的创建； 
+* 动态组合：职责链模式会把功能分散到单独的职责对象中，然后在使用时动态的组合形成链，可以通过在运行时对该链进行动态的增加或修改来增加或改变处理一个请求的职责。 
+* 在系统中增加处理者无需修改原有代码，只需在客户端重新建链即可，符合开闭原则； 
+* 责任分担：每个类只需要处理自己该处理的工作，不该处理的传递给下一个对象完成，明确各类的责任范围，符合类的单一职责原则。
+##### 缺点
+* 由于一个请求没有明确的接受者，那么就不能保证它一定会被处理，可能一直到链的末端都得不到处理；一个请求也可能因为职责链没有创建正确而到不到处理
+* 对于较长的职责链，请求处理时需要很多的职责对象，系统性能将受影响，调试也不方便
+* 采用了类似递归的方式，调试时逻辑可能比较复杂
+* 建链不当，可能造成循环调用，系统陷入死循环
 
+##### 适用场景　　　
+* 有多个对象可以处理同一个请求，具体哪个对象处理该请求待运行时刻再确定； 
+* 在不明确指定接受者的情况下，向多个对象中的一个提交一个请求； 
+* 可动态指定一组对象处理请求，客户端可以动态创建职责链来处理请求。 
+* 对于职责链中的一个处理者对象，有两个行为
+* 一是处理请求，二是将请求传递到下一节点，不允许某个处理者对象在处理了请求后又将请求传送给上一个节点的情况。 
+* 最佳应用场景：有多个对象可以处理同一个请求时，比如：多级请求、请假/加薪等审批流程、Java Web中Tomcat对Encoding的处理、拦截器
+
+##### 对于职责链来说，可以分为两种情况：纯的职责链模式和不纯的职责链模式
+
+* 纯的职责链模式要求一个具体的处理者对象只能在两个行为中选择一个： 
+* 要么承担全部责任，要么将责任推给下家，不允许出现某一个具体处理者承担了一部分或者全部责任后又将责任向下传递。 
+* 而且一个请求必须被某一个处理者所接受，不能出现某个请求未被任何一个处理者对象处理的情况。
+
+* 不纯的职责链模式，允许某个请求被一个具体处理者部分处理后向下传递，或者一个具体处理者处理完某个请求后其后续处理者可以继续处理该请求 
+* 而且一个请求可以最终不被任何处理者对象接受并处理
 
 ```
-#include <iostream>
-#include <list>
+#include <bits/stdc++.h>
 
-    class Man;
-    class Woman;
-    using namespace std;
+//
+//职责链模式(Chain of Responsibility Pattern)
+//关键代码：Handler内指明其上级，handleRequest()里判断是否合适，不合适则传递给更高一级处理者
 
-    class Action
-    {
-    public:
-        virtual void getManResult(Man* man) =0;
-        virtual void getWomanResult(Woman* woman) =0;
 
-    private:
-    };
+//定义处理请示的接口
+//抽象类
+class Handler {
+protected:
+    std::shared_ptr<Handler> m_pNextHandler;
+public:
+    Handler() : m_pNextHandler(nullptr) {}
 
-    class Success:public Action
-    {
-    public:
-        void getManResult(Man* man) override
-        {
-            cout << "男人的给的评价该歌手是很成功" << endl;
-        }
+    Handler(const std::shared_ptr<Handler> pNextHandler) : m_pNextHandler(pNextHandler) {}
 
-        void getWomanResult(Woman* woman) override
-        {
-            cout << "女人的给的评价该歌手是很成功" << endl;
-        }
-    };
+    virtual ~Handler() = default;
 
-    class Fail :public Action
-    {
-    public:
-        void getManResult(Man* man) override
-        {
-            cout << "男人的给的评价该歌手是失败" << endl;
-        }
-
-        void getWomanResult(Woman* woman) override
-        {
-            cout << "女人的给的评价该歌手是失败" << endl;
-        }
-    };
-
-    class Person
-    {
-    public:
-        //提供一个方法让访问者可以访问
-        virtual void accept(Action* action) = 0;
-    };
-
-//这里用用到了双分派，即首先在客户端程序中，将具体的状态作为参数传递进Man中（第一次分派）
-//然后在Man中调用作为参数的“具体方法” getManResult同时将自己作为参数传入完成第二次分派
-    class Man:public Person
-    {
-    public:
-        void accept(Action* action) override
-        {
-            action->getManResult(this);
-        }
-    };
-
-    class Woman: public Person
-    {
-    public:
-        void accept(Action* action) override
-        {
-            action->getWomanResult(this);
-        }
-    };
-
-//数据结构，管理很多人（Man、Woman）用来装符合某一个评价的所有人
-    class ObjectStructure
-    {
-    public:
-        //添加到list
-        void attach(Person* p)
-        {
-            persons.push_back(p);
-        }
-        //移除
-        void detach(Person* p)
-        {
-            persons.remove(p);
-            delete p;
-        }
-
-        //显示测评情况
-        void display(Action* action)
-        {
-            for (auto value : persons)
-            {
-                value->accept(action);
-            }
-        }
-    private:
-        list<Person*> persons;
-    };
-
-    int main(int argc, char* argv[])
-    {
-        //创建ObjectStructure（可以创建很多个不同的ObjectStructure来代表不同评价，然后把同样评价的人放到一个ObjectStructure中）
-        auto* objectStructure = new ObjectStructure;
-        objectStructure->attach(new Man);
-        objectStructure->attach(new Woman);
-
-        //假如歌手获得成功
-        auto* success = new Success;
-        objectStructure->display(success);
-        cout << "=======================" << endl;
-        //假如歌手失败了
-        Fail* fail = new Fail;
-        objectStructure->display(fail);
-        return 0;
+    //设置下一个执行者/更高一级的执行者
+    void SetNextHandler(const std::shared_ptr<Handler> pNextHandler) {
+        m_pNextHandler = pNextHandler;
     }
 
+    virtual void HandleRequest(int request) = 0;
+
+};
+
+//具体处理类，处理负责的请求，无法处理就丢给后继者
+//链上的第1个节点
+class ConcreteHandler1 : public Handler {
+public:
+    ConcreteHandler1() {}
+
+    ConcreteHandler1(const std::shared_ptr<Handler> pNextHandler) : Handler(pNextHandler) {}
+
+    void HandleRequest(int request) override {
+        std::cout << "节点1收到请求" << std::endl;
+        if (request >= 0 && request < 10)
+            std::cout << "节点1处理请求 " << request << std::endl;
+        else if (m_pNextHandler) {
+            std::cout << "我是节点1,这个事情我处理不了,得交给上一级" << std::endl;
+            m_pNextHandler->HandleRequest(request);
+        }
+
+    }
+};
+
+//具体处理类，处理负责的请求，无法处理就丢给后继者
+//链上的第2个节点
+class ConcreteHandler2 : public Handler {
+public:
+    ConcreteHandler2() {}
+
+    ConcreteHandler2(const std::shared_ptr<Handler> pNextHandler) : Handler(pNextHandler) {}
+
+    void HandleRequest(int request) override {
+        std::cout << "节点2收到请求" << std::endl;
+        if (request >= 10 && request < 20)
+            std::cout << "节点2处理请求 " << request << std::endl;
+        else if (m_pNextHandler) {
+            std::cout << "我是节点2,这个事情我处理不了,得交给上一级" << std::endl;
+            m_pNextHandler->HandleRequest(request);
+        }
+
+    }
+};
+
+//具体处理类，处理负责的请求，无法处理就丢给后继者
+//链上的第3个节点
+class ConcreteHandler3 : public Handler {
+public:
+    ConcreteHandler3() {}
+
+    ConcreteHandler3(const std::shared_ptr<Handler> pNextHandler) : Handler(pNextHandler) {}
+
+    void HandleRequest(int request) override {
+        std::cout << "节点3收到请求" << std::endl;
+        if (request >= 20)
+            std::cout << "节点3处理请求 " << request << std::endl;
+        else if (m_pNextHandler) {
+            std::cout << "我是节点3,这个事情我处理不了,得交给上一级" << std::endl;
+            m_pNextHandler->HandleRequest(request);
+
+        } else {
+            std::cout << "我是节点3,这个事情没有节点可以处理" << std::endl;
+        }
+    }
+};
+
+int main() {
+    std::shared_ptr<Handler> pHandle_3 = std::make_shared<ConcreteHandler3>();
+    std::shared_ptr<Handler> pHandle_2 = std::make_shared<ConcreteHandler2>(pHandle_3);
+    std::shared_ptr<Handler> pHandle_1 = std::make_shared<ConcreteHandler1>();//首节点
+    pHandle_1->SetNextHandler(pHandle_2);
+
+    int request[] = {2, 5, 14, 44, 22, 15, 23, 12, -5};
+
+    //客户端将请求交给首节点，然后请求即可在链上传递
+    for (auto i : request) {
+        pHandle_1->HandleRequest(i);
+        std::cout << std::string(30, '-') << std::endl;
+    }
+
+    return 0;
+    //运行结果：
+    //节点1收到请求
+    //节点1处理请求 2
+    //------------------------------
+    //节点1收到请求
+    //节点1处理请求 5
+    //------------------------------
+    //节点1收到请求
+    //我是节点1,这个事情我处理不了,得交给上一级
+    //节点2收到请求
+    //节点2处理请求 14
+    //------------------------------
+    //节点1收到请求
+    //我是节点1,这个事情我处理不了,得交给上一级
+    //节点2收到请求
+    //我是节点2,这个事情我处理不了,得交给上一级
+    //节点3收到请求
+    //节点3处理请求 44
+    //------------------------------
+    //节点1收到请求
+    //我是节点1,这个事情我处理不了,得交给上一级
+    //节点2收到请求
+    //我是节点2,这个事情我处理不了,得交给上一级
+    //节点3收到请求
+    //节点3处理请求 22
+    //------------------------------
+    //节点1收到请求
+    //我是节点1,这个事情我处理不了,得交给上一级
+    //节点2收到请求
+    //节点2处理请求 15
+    //------------------------------
+    //节点1收到请求
+    //我是节点1,这个事情我处理不了,得交给上一级
+    //节点2收到请求
+    //我是节点2,这个事情我处理不了,得交给上一级
+    //节点3收到请求
+    //节点3处理请求 23
+    //------------------------------
+    //节点1收到请求
+    //我是节点1,这个事情我处理不了,得交给上一级
+    //节点2收到请求
+    //节点2处理请求 12
+    //------------------------------
+    //节点1收到请求
+    //我是节点1,这个事情我处理不了,得交给上一级
+    //节点2收到请求
+    //我是节点2,这个事情我处理不了,得交给上一级
+    //节点3收到请求
+    //我是节点3,这个事情没有节点可以处理
+    //------------------------------
+}
 
 
 ```

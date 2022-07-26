@@ -1,0 +1,7 @@
+### *AbstactFactory 模式*
+#### 功能：
+要创建一组相关或者相互依赖的对象。
+
+#### 总结：
+* AbstractFactory*模式和*Factory*模式的区别：* AbstractFactory模式是为创建一组（有多类）相关或依赖的对象提供创建接口
+* Factory模式是为一类对象提供创建接口或延迟对象的创建到子类中实现。并且可以看到，AbstractFactory模式通常都是使用 Factory 模式实现。
