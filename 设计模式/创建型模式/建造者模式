@@ -1,0 +1,196 @@
+### *Builder 模式*
+#### 功能：
+* 当我们要创建的对象很复杂的时候（通常是由很多其他的对象组合而成），我们要要复杂对象的创建过程和这个对象的表示（展示）分离开来，这样做的好处就是通过一步步的进行复杂对象的构建
+* 由于在每一步的构造过程中可以引入参数，使得经过相同的步骤创建最后得到的对象的展示不一样。
+
+```
+//Product.h 
+#ifndef _PRODUCT_H_
+#define _PRODUCT_H_
+
+class Product
+{
+public:
+    Product();
+    ~Product();
+    void ProducePart();
+protected:  // 可以被继承访问
+private:
+};
+
+class ProductPart
+{
+public:
+    ProductPart();
+    ~ProductPart();
+    ProductPart* BuildPart();
+protected:
+private:
+};
+#endif //~_PRODUCT_H_
+
+
+//Component.cpp
+#include "Component.h"
+// 一系列函数的定义
+Component::Component()
+{
+}
+
+Component::~Component()
+{
+}
+
+void Component::Add(const Component&
+com)
+{
+}
+
+Component* Component::GetChild(int index)
+{
+    return 0;
+}
+
+void Component::Remove(const Component&
+com)
+{
+}
+
+
+//Builder.h 
+#ifndef _BUILDER_H_
+#define _BUILDER_H_
+#include <string>
+using namespace std;
+class Product;
+// Builder基类
+class Builder
+{
+public:
+    virtual ~Builder();
+// 都声明为纯虚函数
+    virtual void BuildPartA(const string&
+    buildPara) = 0;
+    virtual void BuildPartB(const string&
+    buildPara) = 0;
+    virtual void BuildPartC(const string&
+    buildPara) = 0;
+    virtual Product* GetProduct() = 0;
+// 保护：可以被继承访问，不能被外部访问；
+protected:
+    Builder();
+private:
+};
+
+// ConcreteBuilder : Builder子类
+class ConcreteBuilder:public Builder
+{
+public:
+    ConcreteBuilder();
+    ~ConcreteBuilder();
+    void BuildPartA(const string&
+    buildPara);
+    void BuildPartB(const string& buildPara);
+    void BuildPartC(const string& buildPara);
+    Product* GetProduct();
+protected:
+private:
+};
+#endif //~_BUILDER_H_
+
+
+//Builder.cpp 
+#include "Builder.h"
+#include "Product.h"
+#include <iostream>
+using namespace std;
+// 实际实现
+Builder::Builder()
+{
+}
+Builder::~Builder()
+{
+}
+ConcreteBuilder::ConcreteBuilder()
+{
+}
+ConcreteBuilder::~ConcreteBuilder()
+{
+}
+void ConcreteBuilder::BuildPartA(const string& buildPara)
+{
+    cout<<"Step1:Build PartA..."<<buildPara<<endl;
+}
+void ConcreteBuilder::BuildPartB(const string& buildPara)
+{
+    cout<<"Step1:Build PartB..."<<buildPara<<endl;
+}
+void ConcreteBuilder::BuildPartC(const string& buildPara)
+{
+    cout<<"Step1:Build PartC..."<<buildPara<<endl;
+}
+
+Product* ConcreteBuilder::GetProduct()
+{
+    BuildPartA("pre-defined");
+    BuildPartB("pre-defined");
+    BuildPartC("pre-defined");
+    return new Product();
+}
+
+//Director.h 
+#ifndef _DIRECTOR_H_
+#define _DIRECTOR_H_
+class Builder;
+class Director
+{
+public:
+    Director(Builder* bld);
+    ~Director();
+    void Construct();
+protected:
+private:
+    Builder* _bld;
+};
+#endif //~_DIRECTOR_H_
+
+
+//Director.cpp 
+#include "director.h"
+#include "Builder.h"
+Director::Director(Builder* bld)
+{
+    _bld = bld;
+}
+Director::~Director()
+{
+
+}
+void Director::Construct()
+{
+    _bld->BuildPartA("user-defined");
+    _bld->BuildPartB("user-defined");
+    _bld->BuildPartC("user-defined");
+}
+// 强调的是一步步创建对象，并通过相同的创建过程可以获得不同的结果对象
+//main.cpp 
+#include "Builder.h"
+#include "Product.h"
+#include "Director.h"
+#include <iostream>
+using namespace std;
+int main(int argc,char* argv[])
+{
+    Director* d = new Director(new ConcreteBuilder());
+    d->Construct();
+    return 0;
+}
+
+```
+*Prototype  模式*
+
+#### 总结：
+
+* Builder 模式的关键是其中的 Director对象并不直接返回对象，而是通过一步步（BuildPartA，BuildPartB，BuildPartC）来一步步进行对象的创建。
+* Builder 模式的示例代码中，BuildPart 的参数是通过客户程序员传入的，这里使用“user-defined”代替，实际的可在 Construct 方法中传入这 3 个参数，这样就可以得到不同的细微差别的复杂对象了。
+* Builder 模式和 AbstractFactory 模式在功能上很相似，因为都是用来创建大的复杂的对象，它们的区别是Builder 模式强调的是一步步创建对象，并通过相同的创建过程可以获得不同的结果对象，一般来说 Builder 模式中对象不是直接返回的。而在 AbstractFactory 模式中对象是直接返回的，AbstractFactory 模式强调的是为创建多个相互依赖的对象提供一个同一的接口。

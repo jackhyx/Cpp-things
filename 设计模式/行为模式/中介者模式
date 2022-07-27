@@ -1,0 +1,140 @@
+#include <bits/stdc++.h>
+
+
+//
+//中介者模式
+//关键代码：对象 Colleague 之间的通信封装到一个类中单独处理
+//
+
+
+class Mediator;
+
+//抽象人
+class Person {
+protected:
+    std::shared_ptr<Mediator> m_mediator; //中介
+public:
+    Person(const std::shared_ptr<Mediator> pMediator)
+            : m_mediator(pMediator) {}
+
+    virtual ~Person() = default;//虚析构函数
+
+    //向中介发送信息
+    virtual void SendMessage(const std::string &message) = 0;
+
+    //从中介获取信息
+    //message 中介向该对象发送的信息/从中介获取的信息
+    virtual void GetMessage(const std::string &message) = 0;
+};
+
+//抽象中介机构
+class Mediator {
+public:
+    virtual ~Mediator() = default;
+
+    //由于后面this指针的原因,此处未采用智能指针
+    virtual void Send(std::string message, const Person *from_person) const = 0;
+
+    virtual void Register(std::shared_ptr<Person> pPerson) = 0;
+};
+
+//租房者A
+class RenterA : public Person {
+public:
+    RenterA(const std::shared_ptr<Mediator> mediator) : Person(mediator) {}
+
+    void SendMessage(const std::string &message) override {
+        m_mediator->Send(message, this);
+    }
+
+    void GetMessage(const std::string &message) override {
+        std::cout << "租房者A收到信息" << message << std::endl;;
+    }
+};
+
+//租房者B
+class RenterB : public Person {
+public:
+    RenterB(const std::shared_ptr<Mediator> mediator) : Person(mediator) {}
+
+    void SendMessage(const std::string &message) override {
+        m_mediator->Send(message, this);
+    }
+
+    void GetMessage(const std::string &message) override {
+        std::cout << "租房者B收到信息" << message << std::endl;;
+    }
+};
+
+
+//房东
+class Landlord : public Person {
+public:
+    Landlord(const std::shared_ptr<Mediator> mediator) : Person(mediator) {}
+
+    void SendMessage(const std::string &message) override {
+        m_mediator->Send(message, this);
+    }
+
+    void GetMessage(const std::string &message) override {
+        std::cout << "房东收到信息：" << message << std::endl;;
+    }
+};
+
+//房屋中介
+class HouseMediator : public Mediator {
+private:
+    //也可以采用多个list,将多个房东放入一个list,将多个求租者放入一个list
+    std::vector<std::shared_ptr<Person>> m_pPersonList;
+public:
+    void Register(const std::shared_ptr<Person> pPerson) override {
+        //没有添加该同事，则添加进去
+        auto iter = m_pPersonList.begin();
+        for (; iter != m_pPersonList.end(); ++iter) {
+            if (*iter == pPerson)
+                break;
+        }
+
+        if (iter == m_pPersonList.end())
+            m_pPersonList.emplace_back(pPerson);
+
+    }
+
+    void Send(std::string message, const Person *from_person) const override {
+        //接收消息的对象为该对象的对应对象
+        //
+        for (const auto item:m_pPersonList) {
+            //此处采用typeid,而非直接判断指针是否相等为同一个对象.
+            // 具体何种方式，一般区别不大，视情况而定
+            if (typeid(*item.get()) != typeid(*from_person))
+                //if( item.get() != from_person)
+                item->GetMessage(message);
+        }
+    }
+};
+
+int main() {
+    std::shared_ptr<Mediator> pHouseMediator = std::make_shared<HouseMediator>();
+    std::shared_ptr<Person> pRenterA = std::make_shared<RenterA>(pHouseMediator);
+    std::shared_ptr<Person> pRenterB = std::make_shared<RenterB>(pHouseMediator);
+    std::shared_ptr<Person> pLandlord = std::make_shared<Landlord>(pHouseMediator);
+
+    pHouseMediator->Register(pRenterA);
+    pHouseMediator->Register(pRenterB);
+    pHouseMediator->Register(pLandlord);
+
+    pLandlord->SendMessage("出租房子：中山路100号，50平米，2000元一个月");//所有的求租者将会收到该消息
+
+    std::cout << std::string(50, '-') << std::endl;
+
+    pRenterA->SendMessage("我想在中山路附近租套房子，价格1500元一个月");//所有的房东将会收到该消息
+
+    return 0;
+
+    //运行结果如下：
+    //租房者A收到信息出租房子：中山路100号，50平米，2000元一个月
+    //租房者B收到信息出租房子：中山路100号，50平米，2000元一个月
+    //--------------------------------------------------
+    //租房者B收到信息我想在中山路附近租套房子，价格1500元一个月
+    //房东收到信息：我想在中山路附近租套房子，价格1500元一个月
+}

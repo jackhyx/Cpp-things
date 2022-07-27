@@ -1,0 +1,351 @@
+// 状态模式
+//State.h
+#pragma once
+class State
+{
+public:
+	//扣除50积分
+	virtual void deductMeney() = 0;
+
+	//是否中奖
+	virtual bool raffle() = 0;
+
+	//发放奖品
+	virtual void dispensePrize() = 0;
+};
+
+//CanRaffleState.h
+#pragma once
+#include <iostream>
+#include "State.h"
+using namespace std;
+
+class RaffleActivity;
+//能抽奖状态
+class CanRaffleState :public State
+{
+public:
+	CanRaffleState(RaffleActivity* activity);
+	//已经扣除积分了，不能再扣了
+	void deductMeney() override;
+	//可以抽奖，根据抽奖情况改成新的状态
+	bool raffle() override;
+	void dispensePrize() override;
+private:
+	RaffleActivity* activity;
+};
+
+//CanRaffleState.cpp
+#include "CanRaffleState.h"
+#include "RaffleActivity.h"
+CanRaffleState::CanRaffleState(RaffleActivity* activity)
+{
+	srand(time(NULL));
+	this->activity = activity;
+}
+
+//已经扣除积分了，不能再扣了
+void CanRaffleState::deductMeney() 
+{
+	cout << "已经扣过积分了" << endl;
+}
+
+//可以抽奖，根据抽奖情况改成新的状态
+bool CanRaffleState::raffle()
+{
+	cout << "正在抽奖" << endl;
+	int result = rand() % 10;
+	if (0 == result)
+	{
+		//将activity的状态设置为发放奖品的状态
+		activity->setState(activity->getDispenseState());
+		return true;
+	}
+	else
+	{
+		cout << "很遗憾没有抽中奖品" << endl;
+		//将activity的状态设置为不能抽奖的状态
+		activity->setState(activity->getNoRaffleState());
+		return false;
+	}
+}
+
+void CanRaffleState::dispensePrize()
+{
+	cout << "没中奖，不能发放奖品" << endl;
+}
+
+//RaffleActivity.h
+#pragma once
+#include "State.h"
+class RaffleActivity;
+//奖品发送完毕状态
+class DispenseOutState :public State
+{
+public:
+	DispenseOutState(RaffleActivity* activity);
+	void deductMeney() override;
+	bool raffle() override;
+	//发放奖品
+	void dispensePrize() override;
+
+private:
+	RaffleActivity* activity;
+};
+
+//RaffleActivity.cpp
+#include "DispenseOutState.h"
+#include "RaffleActivity.h"
+
+DispenseOutState::DispenseOutState(RaffleActivity* activity)
+{
+	this->activity = activity;
+}
+
+void DispenseOutState::deductMeney()
+{
+	cout << "奖品已经发完了，请下次再参加" << endl;
+}
+
+bool DispenseOutState::raffle()
+{
+	cout << "奖品已经发完了，请下次再参加" << endl;
+	return false;
+}
+
+//发放奖品
+void DispenseOutState::dispensePrize()
+{
+	cout << "奖品已经发完了，请下次再参加" << endl;
+}
+//RaffleActivity.h
+#pragma once
+#include <iostream>
+#include "State.h"
+
+using namespace std;
+
+class RaffleActivity;
+
+//发放奖品的状态
+class DispenseState :public State
+{
+public:
+	DispenseState(RaffleActivity* activity);
+	void deductMeney() override;
+	bool raffle() override;
+	//发放奖品
+	void dispensePrize() override;
+
+private:
+	RaffleActivity* activity;
+};
+//DispenseState.cpp
+#include "DispenseState.h"
+#include "RaffleActivity.h"
+
+DispenseState::DispenseState(RaffleActivity* activity)
+{
+	this->activity = activity;
+}
+
+void DispenseState::deductMeney()
+{
+	cout << "不能扣除积分" << endl;
+}
+
+bool DispenseState::raffle() 
+{
+	cout << "不能抽奖了" << endl;
+	return false;
+}
+
+//发放奖品
+void DispenseState::dispensePrize()
+{
+	if (activity->getCount() > 0)
+	{
+		cout << "送出奖品" << endl;
+		activity->setState(activity->getNoRaffleState());
+	}
+	else
+	{
+		cout << "很遗憾,奖品发完了" << endl;
+		//奖品已经发完，后面的人就不能抽奖了
+		activity->setState(activity->getDispenseOutState());
+	}
+}
+//RaffleActivity.h
+#pragma once
+#include <iostream>
+#include "State.h"
+
+using namespace std;
+class RaffleActivity;
+
+//不能抽奖状态
+class NoRaffleState :public State
+{
+public:
+	NoRaffleState(RaffleActivity* activity);
+	//在不能抽奖状态是可以扣积分的，扣除积分后设置成可以抽奖状态
+	void deductMeney() override;
+	bool raffle() override;
+	void dispensePrize() override;
+
+private:
+	//初始化时传入活动，扣除积分后改变其状态
+	RaffleActivity* activity;
+};
+
+//NoRaffleState.cpp
+#include "NoRaffleState.h"
+#include "RaffleActivity.h";
+
+//不能抽奖状态
+NoRaffleState::NoRaffleState(RaffleActivity* activity)
+{
+	this->activity = activity;
+}
+
+//在不能抽奖状态是可以扣积分的，扣除积分后设置成可以抽奖状态
+void NoRaffleState::deductMeney()
+{
+	std::cout << "扣除50积分，可以抽奖了" << endl;
+	activity->setState(activity->getCanRaffleState());
+}
+
+bool NoRaffleState::raffle()
+{
+	cout << "扣了积分才能抽奖" << endl;
+	return false;
+}
+
+void NoRaffleState::dispensePrize()
+{
+	cout << "不能发奖品" << endl;
+}
+
+//RaffleActivity.h
+#pragma once
+#include "CanRaffleState.h"
+#include "DispenseOutState.h"
+#include "DispenseState.h"
+#include "State.h"
+#include "NoRaffleState.h"
+
+class RaffleActivity
+{
+public:
+	State* getState() const{
+		return state;
+	}
+	void setState(State* const state)
+	{
+		this->state = state;
+	}
+
+	int getCount()
+	{
+		return count--;
+	}
+
+	void setCount(const int count)
+	{
+		this->count = count;
+	}
+
+	State* getNoRaffleState() const
+	{
+		return noRaffleState;
+	}
+
+	void setNoRaffleState(State* const noRaffleState)
+	{
+		this->noRaffleState = noRaffleState;
+	}
+
+	State* getCanRaffleState() const
+	{
+		return canRaffleState;
+	}
+
+	void setCanRaffleState(State* const canRaffleState)
+	{
+		this->canRaffleState = canRaffleState;
+	}
+
+	State* getDispenseState() const
+	{
+		return dispenseState;
+	}
+
+	void setDispenseState(State* const dispenseState)
+	{
+		this->dispenseState = dispenseState;
+	}
+
+	State* getDispenseOutState() const
+	{
+		return dispenseOutState;
+	}
+
+	void setDispenseOutState(State* const dispenseOutState)
+	{
+		this->dispenseOutState = dispenseOutState;
+	}
+
+
+	RaffleActivity(int count)
+	{
+		//初始化当前状态为 不能抽奖状态
+		this->state = getNoRaffleState();
+		//初始化奖品数量
+		this->count = count;
+	}
+
+	//扣分，调用当前状态的deductMoney
+	void deductMoney()
+	{
+		state->deductMeney();
+	}
+
+	//抽奖
+	void raffle()
+	{
+		//如果抽中奖了，则领奖品
+		if (state->raffle())
+		{
+			state->dispensePrize();
+		}
+	}
+
+private:
+	//state表示活动当前的状态
+	State* state = nullptr;
+	//奖品数量
+	int count = 0;
+	//四个属性 表示四种状态
+	State* noRaffleState = new NoRaffleState(this);
+	State* canRaffleState = new CanRaffleState(this);
+	State* dispenseState = new DispenseState(this);
+	State* dispenseOutState = new DispenseOutState(this);
+};
+
+//main.cpp
+#include <iostream>
+#include "RaffleActivity.h"
+using namespace std;
+int main(int argc, char* argv[])
+{
+	RaffleActivity* activity = new RaffleActivity(1);
+
+	for(int i=0;i<50;i++)
+	{
+		cout << "第" << i << "次抽奖" << endl;
+		activity->deductMoney();
+		activity->raffle();
+		cout << endl;
+	}
+	return 0;
+}
