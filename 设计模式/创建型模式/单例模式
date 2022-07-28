@@ -100,3 +100,164 @@ int main()
 
 Singleton 不可以被实例化，因此将其构造函数声明private
 Singleton 模式经常和 Factory（AbstractFactory）模式在一起使用，因为系统中工厂对象一般来说只要一个
+
+```
+package main
+
+import (
+	"log"
+	"sync"
+	"time"
+)
+
+type Singleton struct {
+	Name string
+}
+
+var (
+	instance *Singleton
+	lock     sync.Mutex
+)
+
+func GetInstance() *Singleton {
+// 读锁和写锁是互斥的。所以 second goroutine 在 first goroutine 没有释放写锁之前，
+// 会一直 waiting ，直到 first goroutine 释放写锁，所以也就不会发生数据竞争。
+// 实现一个读锁，保证和下面的 instance 赋值是同步的，保证原子性
+	lock.RLock()
+	lock.RUnlock() 
+	if instance == nil { // 19 行
+		lock.Lock()        // 20 行
+		defer lock.Unlock()  // 21 行
+		if instance == nil {  // 22 行
+			instance = &Singleton{Name: "zhangsan"}
+		}
+	}
+	return instance
+}
+
+func main() {
+	for i := 0; i < 5; i++ {
+		go func() {
+			resp := GetInstance()
+			log.Printf("the value is : %s", resp.Name)
+		}()
+	}
+	time.Sleep(time.Second)
+}
+	
+```
+
+### 在「简易版」中出现数据竞争的原因是:  
+* instance 变量在同一时刻既有 goroutine 读，也有 goroutine 写，
+* 本质原因是变量的修改非原子操作
+* golang 中提供了一个原子操作 package atomic ，atomic 的逻辑是实现在硬件层面之上，其意味着即使有多个 goroutine 修改同一个 atomic 变量
+* 该变量也会正确更新且不会发生数据竞争
+
+
+```
+package main
+
+import (
+   "fmt"
+   "sync"
+   "sync/atomic"
+   "time"
+)
+
+type Singleton struct {
+   Name string
+}
+
+var (
+   instance *Singleton
+   lock     sync.Mutex
+   flag     uint32 
+)
+
+func GetInstance() *Singleton {
+   if atomic.LoadUint32(&flag) == 0 {
+      lock.Lock()
+      defer lock.Unlock()
+      if atomic.LoadUint32(&flag) == 0 {
+         instance = &Singleton{Name: "zhangsan"}
+         defer atomic.StoreUint32(&flag, 1)
+      }
+   }
+   return instance
+}
+
+
+```
+
+### golang 也提供了一种双重检查锁的方法 sync.Once
+* sync.Once 只暴露了一个方法 Do，你可以多次调用 Do 方法
+* 但是只有第一次调用 Do 方法时 f 参数才会执行，这里的 f 是一个无参数无返回值的函数。
+
+```
+package main
+
+import (
+	"log"
+	"sync"
+	"time"
+)
+
+type Singleton struct {
+	Name string
+}
+
+var (
+	instance *Singleton
+	once     sync.Once
+)
+
+func GetInstance() *Singleton {
+	once.Do(func() {
+		instance = &Singleton{Name: "zhangsan"}
+	})
+	return instance
+}
+```
+### 性能比较
+* sync.once > atomic > lock
+通过上面的表格，发现 sync.once 的性能更佳，是否意味着，我们遇到单例模式就用 sync.once 了呢？实则不然，因为有些场景下使用读写锁的方式实现更容易实现，比如下面这个例子。
+我们希望在 map 中实现一个单例，map 中的 key 对应的 value 如果不存在，就初始化一个，存在就返回，通过读写锁实现代码如下:
+
+```
+package main
+
+import (
+	"fmt"
+	"strconv"
+	"sync"
+	"time"
+)
+
+type Singleton struct {
+	Name string
+}
+
+var (
+	lock      sync.RWMutex
+	instances = map[string]*Singleton{}
+)
+
+func getInstance(key string) *Singleton {
+	lock.RLock()
+	if value, ok := instances[key]; ok {
+		lock.RUnlock()
+		return value
+	}
+
+	lock.RUnlock()
+
+	lock.Lock()
+	defer lock.Unlock()
+	if value, ok := instances[key]; ok {
+		return value
+	}
+	instance := &Singleton{Name: "zhangsan"}
+	instances[key] = instance
+	return instance
+}
+```
