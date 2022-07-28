@@ -1,3 +1,11 @@
+## https://lfool.github.io/LFool-Notes/
+
+## https://labuladong.gitee.io/algo/5/
+
+## https://programmercarl.com/
+
+## https://blog.csdn.net/m0_67739923?type=blog
+## https://blog.csdn.net/weixin_42396991?type=blog
 ```
   int n = 1005; // 根据题意而定
     int father[1005];
@@ -56,4 +64,119 @@
             Rank[x]++;
             }
     }
+```
+
+### 128. 最长连续序列
+* 给定一个未排序的整数数组 nums ，找出数字连续的最长序列（不要求序列元素在原数组中连续）的长度。
+* 请你设计并实现时间复杂度为 O(n) 的算法解决此问题。
+* 示例 1：
+输入：nums = [100,4,200,1,3,2]
+输出：4
+解释：最长数字连续序列是 [1, 2, 3, 4]。它的长度为 4。
+```
+    int find(int u) {
+            return u == father[u] ? u : father[u] = find(father[u]);
+    }
+    
+    int join(int u, int v) {
+        u = find(u);
+        v = find(v);
+        if (u == v) return 0;
+        father[v] = u;
+        // 记录每个连通分量中的节点数
+        cnt[u] += cnt[v];
+        return  cnt[u];
+    }
+    
+    void init() {
+        for (int i = 0; i < 100001; ++i) {
+            father[i] = i;
+        }
+    }
+    
+    int longestConsecutive(vector<int>& nums) {
+        if (nums.size() < 2) return nums.size();
+        // 初始化
+        for (auto x : nums) father[x] = x, cnt[x] = 1;
+        int ans = 1;
+        for (auto x : nums) {
+            if (x != INT_MAX && father.count(x + 1)) {
+                ans = max(ans, join(x, x + 1));
+            }
+        }
+        
+        return ans;
+    }
+
+
+```
+
+### 2316. 统计无向图中无法互相到达点对数
+* 给你一个整数 n ，表示一张 无向图 中有 n 个节点，编号为 0 到 n - 1 。
+* 同时给你一个二维整数数组 edges ，其中 edges[i] = [ai, bi] 表示节点 ai 和 bi 之间有一条 无向边。
+请你返回 无法互相到达 的不同 点对数目 。 
+* 示例 1：
+输入：n = 3, edges = [[0,1],[0,2],[1,2]]
+输出：0
+解释：所有点都能互相到达，意味着没有点对无法互相到达，所以我们返回 0 。
+
+```
+/* 并查集模板 */
+class UnionFind {
+public:
+    vector<int> parent;
+    vector<int> size;
+    int n;
+    // 当前连通分量数目
+    int setCount;
+public:
+    UnionFind(int _n): n(_n), setCount(_n), parent(_n), size(_n, 1) {
+        iota(parent.begin(), parent.end(), 0);  /* 赋值0-n-1 */
+    }
+    
+    int findset(int x) {
+        return parent[x] == x ? x : parent[x] = findset(parent[x]);
+    }
+    
+    bool unite(int x, int y) {
+        x = findset(x);
+        y = findset(y);
+        if (x == y) {
+            return false;
+        }
+        if (size[x] < size[y]) {
+            swap(x, y);
+        }
+        parent[y] = x;
+        size[x] += size[y];
+        --setCount;
+        return true;
+    }
+    
+    bool connected(int x, int y) {
+        x = findset(x);
+        y = findset(y);
+        return x == y;
+    }
+};
+
+class Solution {
+public:
+    long long countPairs(int n, vector<vector<int>>& edges) {
+        UnionFind uf(n);
+        /* 节点联通 */
+        for (auto &e : edges) {
+            uf.unite(e[0], e[1]);
+        }
+        long long ans = 0;
+        for (int i = 0; i < n; i++) {
+            if (uf.parent[i] == i) {
+                ans += (long long)uf.size[i] * (n - uf.size[i]); /* 计算不连通对数 */
+            }
+        }
+        return ans / 2; /* 结果/2 */
+    }
+};
+
+
 ```
