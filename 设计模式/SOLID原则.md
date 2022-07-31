@@ -1,4 +1,3 @@
-
 #### SRP：单一职责原则
 * 单一职责原则（The Single Responsibility Principle，SRP）
 * 一个模块应该有且只有一个导致其变化的原因。
