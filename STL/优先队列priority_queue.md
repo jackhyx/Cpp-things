@@ -1,9 +1,11 @@
-priority_queue，优先队列，是一个拥有权值观念的queue，它跟queue一样是顶部入口，底部出口，在插入元素时，元素并非按照插入次序排列，它会自动根据权值（通常是元素的实值）排列，权值最高，排在最前面，如下图所示。
+
+#### priority_queue，优先队列
+* 是一个拥有权值观念的queue，它跟queue一样是顶部入口，底部出口，在插入元素时，元素并非按照插入次序排列，它会自动根据权值（通常是元素的实值）排列，权值最高，排在最前面，如下图所示。
 
 
 
 默认情况下，priority_queue使用一个max-heap完成，底层容器使用的是一般为vector为底层容器，堆heap为处理规则来管理底层容器实现 。priority_queue的这种实现机制导致其不被归为容器，而是一种容器配接器。关键的源码如下：
-
+```
 template <class T, class Squence = vector<T>, 
 class Compare = less<typename Sequence::value_tyoe> >
 class priority_queue{
@@ -28,9 +30,9 @@ public:
 };
 Copy to clipboardErrorCopied
 priority_queue的所有元素，进出都有一定的规则，只有queue顶端的元素（权值最高者），才有机会被外界取用，它没有遍历功能，也不提供迭代器
-
+```
 举个例子：
-
+```
 #include <queue>
 #include <iostream>
 using namespace std;
@@ -53,9 +55,11 @@ int main()
     return 0;
 }
 
+```
 
-## STL中的heap的实现
-heap（堆）并不是STL的容器组件，是priority queue（优先队列）的底层实现机制，因为binary max heap（大根堆）总是最大值位于堆的根部，优先级最高。
+###  STL中的heap的实现
+* heap（堆）并不是STL的容器组件，是priority queue（优先队列）的底层实现机制
+* binary max heap（大根堆）总是最大值位于堆的根部，优先级最高。
 
 # binary heap本质是一种complete binary tree（完全二叉树），整棵binary tree除了最底层的叶节点之外，都是填满的，但是叶节点从左到右不会出现空隙，如下图所示就是一颗完全二叉树
 完全二叉树内没有任何节点漏洞，是非常紧凑的，这样的一个好处是可以使用array来存储所有的节点
@@ -63,6 +67,27 @@ heap（堆）并不是STL的容器组件，是priority queue（优先队列）�
 这种以array表示tree的方式称为隐式表述法。
 因此我们可以使用一个array和一组heap算法来实现max heap（每个节点的值大于等于其子节点的值）和min heap（每个节点的值小于等于其子节点的值）
 由于array不能动态的改变空间大小，用vector代替array是一个不错的选择。
+
+定义：priority_queue<Type, Container, Functional>
+Type 就是数据类型，Container 就是容器类型（Container必须是用数组实现的容器，比如vector,deque等等，但不能用 list。STL里面默认用的是vector），Functional 就是比较的方式，当需要用自定义的数据类型时才需要传入这三个参数，使用基本数据类型时，只需要传入数据类型，默认是大顶堆
+一般是：
+```
+//升序队列
+priority_queue <int,vector<int>,greater<int> > q;
+//降序队列
+priority_queue <int,vector<int>,less<int> >q;
+
+//greater和less是std实现的两个仿函数（就是使一个类的使用看上去像一个函数。其实现就是类中实现一个operator()，这个类就有了类似函数的行为，就是一个仿函数类了）
+```
+
+
+
+
+
+
+
+
+
 
 那heap算法有哪些？常见有的插入、弹出、排序和构造算法，下面一一进行描述。
 
