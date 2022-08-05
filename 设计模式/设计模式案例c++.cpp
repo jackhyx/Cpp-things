@@ -1671,3 +1671,46 @@ int main()
         return 0;
     }
 
+    package builder
+
+    import "fmt"
+
+// 建造者接口
+    type Builder interface {
+        Part1()
+        Part2()
+        Part3()
+    }
+
+// 管理类
+    type Director struct {
+        builder Builder
+    }
+
+// 构造函数
+    func NewDirector(builder Builder) *Director {
+        return &Director{
+                builder: builder,
+        }
+    }
+
+// 建造
+    func (d *Director) Construct() {
+        d.builder.Part1()
+        d.builder.Part2()
+        d.builder.Part3()
+    }
+
+    type Builder struct {}
+
+    func (b *Builder) Part1() {
+        fmt.Println("part1")
+    }
+
+    func (b *Builder) Part2() {
+        fmt.Println("part2")
+    }
+
+    func (b *Builder) Part3() {
+        fmt.Println("part3")
+    }
