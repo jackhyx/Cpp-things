@@ -1,17 +1,23 @@
-## c++中的atoi()和stoi()函数的用法和区别
+#### c++中的atoi()和stoi()函数的用法和区别
 
-# 相同点：
+### 相同点：
 
-atoi()和stoi()都是C++的字符处理函数，把# 数字字符串转换成int输出 #
+atoi()和stoi()都是C++的字符处理函数，把数字字符串转换成int输出
 头文件都是#include<string>
 
-# 不同点：
+### 不同点：
 
-atoi()的参数是 const char*,因此对于一个字符串str我们必须调用 c_str()的方法把这个string转换成 const char*类型的
-而stoi()的参数是const string*,不需要转化为 const char*；
+* atoi()的参数是 const char*,因此对于一个字符串str我们必须调用 c_str()的方法把这个string转换成 const char*类型的
+* 而stoi()的参数是const string*,不需要转化为 const char*
 
 stoi()会做范围检查，默认范围是在int的范围内的，如果超出范围的话则会runtime error！
 而atoi()不会做范围检查，如果超出范围的话，超出上界，则输出上界，超出下界，则输出下界；
+
+#### int stoi (const string& str, size_t* idx = 0, int base = 10);
+* 参数 
+* str 一个表示整数的string类型的对象 
+* idx 如果为null，代表不使用这个参数 指向size_t类型对象的指针，该函数将其值设置为str中数值后面的下一个字符的位置，也就是str中既包含数字又包含非数字的话，那么该函数会将数值后面的第一个字符的位置赋值给这个指针。
+* base 确定以何种的基数去解释str中的数值。默认为10。如果填0的话，就按照str中的标志去判定（如0x)
 
 C 库函数 - strtol()
 C 标准库 - <stdlib.h> C 标准库 - <stdlib.h>
