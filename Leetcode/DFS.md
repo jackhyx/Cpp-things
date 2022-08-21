@@ -10,7 +10,7 @@ void dfs( string a ){
     for(int i = 0 ;i<=9;i++){
         dfs(a + char (i+'0'));
     }
-}
+} 
 
 int main(){
     string a ="";
