@@ -88,7 +88,7 @@ public:
     {
         std::cout << "E::func()\t" << i << "\n";
     } // \t tab
-    }
+    
 };
 class F : public E
 {
@@ -168,42 +168,4 @@ return 0;
 }
 ```
 
-举个例子：
-
-```c++
-#include <iostream>
-using namespace std;
-
-class Base 
-{
-public:
-    virtual void  fun()
-    {
-        cout << "base :: fun()" << endl;
-    }
-};
-
-class Son : public Base
-{
-public:
-    virtual void  fun()
-    {
-        cout << "son :: fun()" << endl;
-    }
-    void func()
-    {
-        cout << "son :: not virtual function" <<endl;
-    }
-};
-
-int main()
-{
-    Son s;
-    Base& b = s; // 基类类型引用绑定已经存在的Son对象，引用必须初始化
-    s.fun(); //son::fun()
-    b.fun(); //son :: fun()
-    return 0;
-}
-```
-
-需要说明的是虚函数才具有动态绑定，上面代码中，Son类中还有一个非虚函数func()，这在b对象中是无法调用的，如果使用基类指针来指向子类也是一样的。
+* 需要说明的是虚函数才具有动态绑定，上面代码中，Son类中还有一个非虚函数func()，这在b对象中是无法调用的，如果使用基类指针来指向子类也是一样的。
