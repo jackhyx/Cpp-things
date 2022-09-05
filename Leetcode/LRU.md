@@ -5,6 +5,8 @@
     3、每次访问 cache 中的某个 key，需要将这个元素变为最近使用的，也就是说 cache 要支持在任意位置快速插入和删除元素。
     那么，什么数据结构同时符合上述条件呢？哈希表查找快，但是数据无固定顺序；链表有顺序之分，插入删除快，但是查找慢。所以结合一下，形成一种新的数据结构：哈希链表 LinkedHashMap。
 */
+```c++
+
 class LRUCache {
 private:
     int cap;    // 最大容量
@@ -41,16 +43,17 @@ public:
                 map.erase(cache.back().first);  // 哈希表逐出
                 cache.pop_back();   // 双端队列逐出
             }
-        }else{
+        else{
             // 存在，变更其数据值value
             cache.erase(map[key]);
+            }
         }
         // 向缓存中队头位置插入{key, value}
         cache.push_front({key, value});
         map[key] = cache.begin();
     }
 };
-
+```
 /**
  * Your LRUCache object will be instantiated and called as such:
  * LRUCache* obj = new LRUCache(capacity);
