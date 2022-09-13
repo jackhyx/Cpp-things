@@ -84,3 +84,71 @@ public:
     }
 };
 ```
+### 剑指 Offer II 005. 单词长度的最大乘积
+给定一个字符串数组 words，请计算当两个字符串 words[i] 和 words[j] 不包含相同字符时，它们长度的乘积的最大值。假设字符串中只包含英语的小写字母。如果没有不包含相同字符的一对字符串，返回 0。
+
+示例 1:
+
+输入: words = ["abcw","baz","foo","bar","fxyz","abcdef"]
+输出: 16
+解释: 这两个单词为 "abcw", "fxyz"。它们不包含相同字符，且长度的乘积最大。
+```c++
+class Solution {
+public:
+    int maxProduct(vector<string>& words) {
+        int length = words.size();
+        vector<int> masks(length);
+        for (int i = 0; i < length; i++) {
+            string word = words[i];
+            int wordLength = word.size();
+            for (int j = 0; j < wordLength; j++) {
+                masks[i] |= 1 << (word[j] - 'a');
+            }
+        }
+        int maxProd = 0;
+        for (int i = 0; i < length; i++) {
+            for (int j = i + 1; j < length; j++) {
+                if ((masks[i] & masks[j]) == 0) {
+                    maxProd = max(maxProd, int(words[i].size() * words[j].size()));
+                }
+            }
+        }
+        return maxProd;
+    }
+};
+```
+```c++
+class Solution {
+public:
+    int maxProduct(vector<string>& words) {
+        
+    }
+};
+```
+#### 剑指 Offer II 008. 和大于等于 target 的最短子数组
+给定一个含有 n 个正整数的数组和一个正整数 target 。
+找出该数组中满足其和 ≥ target 的长度最小的 连续子数组 [numsl, numsl+1, ..., numsr-1, numsr] ，并返回其长度。如果不存在符合条件的子数组，返回 0 。
+
+示例 1：
+输入：target = 7, nums = [2,3,1,2,4,3]
+输出：2
+解释：子数组 [4,3] 是该条件下的长度最小的子数组。
+```c++
+class Solution {
+public:
+    int minSubArrayLen(int target, vector<int>& nums) {
+        int sum = 0;
+        int minValue = INT_MAX;
+        int subLength = 0;
+        for (int i = 0, j = 0; i < nums.size(); i++) {
+            sum += nums[i];
+            while(sum >= target) {
+                subLength = i - j + 1;
+                sum -= nums[j++];
+                minValue = min(subLength,minValue)
+            }
+        }
+        return minValue;
+    }
+};
+```
