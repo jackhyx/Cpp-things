@@ -216,3 +216,259 @@ public:
     }
 };
 ```
+
+```c++
+class Solution {
+public:
+    vector<vector<int>> threeSum(vector<int>& nums) {
+        
+    }
+}
+```
+#### 剑指 Offer II 009. 乘积小于 K 的子数组 * 注意细节
+给定一个正整数数组 nums和整数 k ，请找出该数组内乘积小于 k 的连续的子数组的个数。
+示例 1:
+
+输入: nums = [10,5,2,6], k = 100
+输出: 8
+解释: 8 个乘积小于 100 的子数组分别为: [10], [5], [2], [6], [10,5], [5,2], [2,6], [5,2,6]。
+需要注意的是 [10,5,2] 并不是乘积小于100的子数组。
+```c++
+class Solution {
+public:
+    int numSubarrayProductLessThanK(vector<int>& nums, int k) {
+        if(k == 0 || k == 1) return 0;
+        int sum = 1;
+        int res = 0;
+        for (int i = 0, j = 0; i < nums.size(); i++) {
+            sum = sum * nums[i];
+            while(sum >= K) {
+                sum /= nums[j];
+                j++;
+            }
+            res += i - j + 1;
+        }
+        return res;
+    }
+};
+```
+#### 剑指 Offer II 010. 和为 k 的子数组
+给定一个整数数组和一个整数 k ，请找到该数组中和为 k 的连续子数组的个数。
+示例 1：
+
+输入:nums = [1,1,1], k = 2
+输出: 2
+解释: 此题 [1,1] 与 [1,1] 为两种不同的情况
+```c++
+class Solution {
+public:
+    int subarraySum(vector<int>& nums, int k) {
+        int pre = 0;
+        int res = 0;
+        unordered_map<int, int> umap;
+        umap[0] = 1;
+        for (auto & num : nums) {
+            pre += num;
+            if(umap.find(pre - k) != umap.end()) {
+                res += umap[pre - k];
+            }
+            umap[pre]++;
+        }
+        return res;
+    }
+};
+```
+#### 剑指 Offer II 011. 0 和 1 个数相同的子数组
+给定一个二进制数组 nums , 找到含有相同数量的 0 和 1 的最长连续子数组，并返回该子数组的长度。
+
+示例 1：
+输入: nums = [0,1]
+输出: 2
+说明: [0, 1] 是具有相同数量 0 和 1 的最长连续子数组。
+```c++
+class Solution {
+public:
+    int findMaxLength(vector<int>& nums) {
+        int maxLength = 0;
+        unordered_map<int, int> mp;
+        int counter = 0;
+        mp[counter] = -1;
+        int n = nums.size();
+        for (int i = 0; i < n; i++) {
+            int num = nums[i];
+            if (num == 1) {
+                counter++;
+            } else {
+                counter--;
+            }
+            if (mp.count(counter)) {
+                int prevIndex = mp[counter];
+                maxLength = max(maxLength, i - prevIndex);
+            } else {
+                mp[counter] = i;
+            }
+        }
+        return maxLength;
+    }
+};
+```
+
+
+```c++
+class Solution {
+public:
+    int findMaxLength(vector<int>& nums) {
+        int n = nums.size();
+        vector<int> s(n + 1);
+        for (int i = 1; i <= n; i ++ )
+            s[i] = s[i - 1] + (nums[i - 1] == 0 ? -1 : 1);
+
+        unordered_map<int, int> hash;
+        int res = 0;
+        for (int i = 0; i <= n; i ++ )
+        {
+            if (hash.count(s[i]))
+                res = max(res, i - hash[s[i]]);
+            // 只有当s[i]在前面没出现过的时候，存下s[i]和其下标
+            if (!hash.count(s[i]))
+                hash[s[i]] = i;
+        }
+        return res;
+    }
+};
+
+```
+```c++
+class Solution {
+public:
+    int findMaxLength(vector<int>& nums) {
+        unordered_map<int, int> umap;
+        umap[0] = -1; // 
+        int sum = 0;
+        int ans = 0;
+        for (int i = 0; i < nums.size(); i++) {
+            sum += nums[i] ? 1 : -1;
+            if (umap.find(sum) != umap.end()) ans = max(ans, i - umap[sum]);
+            else umap[sum] = i;
+        }
+        return ans;
+    }
+};
+```
+#### 304. 二维区域和检索 - 矩阵不可变
+给定一个二维矩阵 matrix，以下类型的多个请求：
+
+计算其子矩形范围内元素的总和，该子矩阵的 左上角 为 (row1, col1) ，右下角 为 (row2, col2) 。
+实现 NumMatrix 类：
+
+NumMatrix(int[][] matrix) 给定整数矩阵 matrix 进行初始化
+int sumRegion(int row1, int col1, int row2, int col2) 返回 左上角 (row1, col1) 、右下角 (row2, col2) 所描述的子矩阵的元素 总和 。
+```c++
+/一维
+class NumMatrix {
+public:
+    vector<vector<int>> sums;
+
+    NumMatrix(vector<vector<int>>& matrix) {
+        int m = matrix.size();
+        if (m > 0) {
+            int n = matrix[0].size();
+            sums.resize(m, vector<int>(n + 1));
+            for (int i = 0; i < m; i++) {
+                for (int j = 0; j < n; j++) {
+                    sums[i][j + 1] = sums[i][j] + matrix[i][j];
+                }
+            }
+        }
+    }
+    int sumRegion(int row1, int col1, int row2, int col2) {
+        int sum = 0;
+        for (int i = row1; i <= row2; i++) {
+            sum += sums[i][col2 + 1] - sums[i][col1];
+        }
+        return sum;
+    }
+};
+/二维
+class NumMatrix {
+public:
+    vector<vector<int>> sums;
+
+    NumMatrix(vector<vector<int>>& matrix) {
+        int m = matrix.size();
+        if (m > 0) {
+            int n = matrix[0].size();
+            sums.resize(m + 1, vector<int>(n + 1));
+            for (int i = 0; i < m; i++) {
+                for (int j = 0; j < n; j++) {
+                    sums[i + 1][j + 1] = sums[i][j + 1] + sums[i + 1][j] - sums[i][j] + matrix[i][j];
+                }
+            }
+        }
+    }
+
+    int sumRegion(int row1, int col1, int row2, int col2) {
+        return sums[row2 + 1][col2 + 1] - sums[row1][col2 + 1] - sums[row2 + 1][col1] + sums[row1][col1];
+    }
+};
+```
+```c++
+class NumMatrix {
+    vector<vector<int>> sums;
+public:
+    NumMatrix(vector<vector<int>>& matrix) {
+        int m = matrix.size();
+        int n = matrix[0].size();
+        if (m > 0) {
+            sums.resize(m + 1, vector<int>(n + 1, 0));
+            for (int i = 0; i < m; i++) {
+                for (int j = 0; j < n; j++) {
+                    sums[i + 1][j + 1] = sums[i][j + 1] + sums[i + 1][j] - sums[i][j] + matrix[i][j];
+                }
+            }
+        }
+    }
+    
+    int sumRegion(int row1, int col1, int row2, int col2) {
+        return sums[row2 + 1][col2 + 1] - sums[row1][col2 + 1] - sums[row2 + 1][col1] + sums[row1][col1];
+    }
+};
+```
+#### 剑指 Offer II 014. 字符串中的变位词
+给定两个字符串 s1 和 s2，写一个函数来判断 s2 是否包含 s1 的某个变位词。
+换句话说，第一个字符串的排列之一是第二个字符串的 子串 。
+
+示例 1：
+输入: s1 = "ab" s2 = "eidbaooo"
+输出: True
+解释: s2 包含 s1 的排列之一 ("ba").
+```c++
+class Solution {
+public:
+    bool checkInclusion(string s1, string s2) {
+        unordered_map<char, int> umap;
+        for(auto &c : s1) umap[c]++;
+        for(int i = 0, j = 0; i < s2.size(); i++) {
+            umap[s2[i]]--;
+            while(umap[s2[i]] < 0) {
+                umap[s2[j]]++;
+                j++;
+            }
+            if (i - j + 1 == s1.size()) return true;
+        }
+        return false;
+    }
+};
+```
+#### 剑指 Offer II 015. 字符串中的所有变位词
+给定两个字符串 s 和 p，找到 s 中所有 p 的 变位词 的子串，返回这些子串的起始索引。不考虑答案输出的顺序。
+变位词 指字母相同，但排列不同的字符串。
+
+
+示例 1：
+
+输入: s = "cbaebabacd", p = "abc"
+输出: [0,6]
+解释:
+起始索引等于 0 的子串是 "cba", 它是 "abc" 的变位词。
+起始索引等于 6 的子串是 "bac", 它是 "abc" 的变位词。
