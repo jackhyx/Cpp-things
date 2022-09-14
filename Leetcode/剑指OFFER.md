@@ -537,3 +537,284 @@ public:
     }
 };
 ```
+
+#### 剑指 Offer II 025. 链表中的两数相加
+给定两个 非空链表 l1和 l2 来代表两个非负整数。数字最高位位于链表开始位置。它们的每个节点只存储一位数字。将这两数相加会返回一个新的链表。
+可以假设除了数字 0 之外，这两个数字都不会以零开头。
+```c++
+class Solution {
+public:
+    ListNode* addTwoNumbers(ListNode* l1, ListNode* l2) {
+        stack<int> s1, s2;
+        while(l1) {
+            s1.push(l1->val);
+            l1 = l1->next;
+        }
+        while(l2) {
+            s2.push(l2->val);
+            l2 = l2->next;
+        }
+        ListNode* pre = nullptr;
+        int carry = 0;
+        while(!s1.empty() || !s2.empty() || carry != 0) {
+            int sum = carry;
+            if(!s1.empty()) sum += s1.top(), s1.pop();
+            if(!s2.empty()) sum += s2.top(), s2.pop();
+            ListNode* node = new ListNode(sum % 10);
+            node->next = pre;
+            pre = node;
+            carry = sum / 10;
+        }
+        return pre;
+    }
+};
+```
+
+#### 剑指 Offer II 027. 回文链表
+给定一个链表的 头节点 head ，请判断其是否为回文链表。
+如果一个链表是回文，那么链表节点序列从前往后看和从后往前看是相同的。
+示例 1：
+
+输入: head = [1,2,3,3,2,1]
+输出: true
+示例 2：
+
+输入: head = [1,2]
+输出: false
+```c++
+class Solution {
+    public:
+    bool isPalindrome(ListNode* head) {
+        
+    }
+};
+```
+#### 剑指 Offer II 028. 展平多级双向链表
+多级双向链表中，除了指向下一个节点和前一个节点指针之外，它还有一个子链表指针，可能指向单独的双向链表。这些子列表也可能会有一个或多个自己的子项，依此类推，生成多级数据结构，如下面的示例所示。
+
+给定位于列表第一级的头节点，请扁平化列表，即将这样的多级双向链表展平成普通的双向链表，使所有结点出现在单级双链表中。
+
+
+```c++
+class Solution {
+public:
+    Node* flatten(Node* head) {
+        if(!head)
+            return NULL;
+        Node* ch = flatten(head->child);
+        Node* right = flatten(head->next);
+        head->child = NULL;
+        if(ch)
+        {
+            head->next = ch;
+            ch->prev = head;
+            while(ch->next)
+                ch = ch->next;
+            ch->next = right;
+            if(right)
+                right->prev = ch;
+        }
+        return head;
+    }
+};
+class Solution {
+public:
+    Node* flatten(Node* head) {
+        function<Node*(Node*)> dfs = [&](Node* node) {
+            Node* cur = node;
+            // 记录链表的最后一个节点
+            Node* last = nullptr;
+
+            while (cur) {
+                Node* next = cur->next;
+                //  如果有子节点，那么首先处理子节点
+                if (cur->child) {
+                    Node* child_last = dfs(cur->child);
+
+                    next = cur->next;
+                    //  将 node 与 child 相连
+                    cur->next = cur->child;
+                    cur->child->prev = cur;
+
+                    //  如果 next 不为空，就将 last 与 next 相连
+                    if (next) {
+                        child_last->next = next;
+                        next->prev = child_last;
+                    }
+
+                    // 将 child 置为空
+                    cur->child = nullptr;
+                    last = child_last;
+                }
+                else {
+                    last = cur;
+                }
+                cur = next;
+            }
+            return last;
+        };
+
+        dfs(head);
+        return head;
+    }
+};
+
+Node* flatten(Node* head) {
+        Node* cur = head;
+        while(cur != nullptr && cur->child == nullptr) cur = cur->next; //找到有分支的结点
+        if(cur == nullptr) return head; //当递归到最后的一条时，直接返回头结点，不用去连接上一条的结点
+        Node* newHead = flatten(cur->child); //处理后的链表的头结点
+        Node* tailNode = foundTail(newHead); //处理后的链表的尾结点
+        //处理后的新链表插入上一层链表中
+        newHead->prev = cur;
+        if(cur->next) {
+            tailNode->next = cur->next;
+            cur->next->prev = tailNode;
+        }
+        cur->next = newHead;
+        cur->child = nullptr;        
+        return head;
+    }
+    //找到链表的最后一个节点
+    Node* foundTail(Node* head) {
+        if(head == nullptr || head->next == nullptr) return head;
+        Node* cur = head;
+        while(cur->next) cur = cur->next;
+        return cur;
+    }
+
+class Solution {
+public:
+    Node* flatten(Node* head) {
+        if(head == nullptr) return nullptr;
+        Node* node = head;
+        while(node != nullptr) {
+            // 孩子不为空
+            if(node -> child != nullptr) {
+                Node* next = node -> next;
+                Node* child = flatten(node -> child);
+                // 扁平化
+                node -> next = child;
+                child -> prev = node;
+                // 孩子要去掉
+                node -> child = nullptr;
+                if(next != nullptr) {
+                    // 遍历到当前扁平化的尾部
+                    while(node -> next != nullptr) {
+                        node = node -> next;
+                    }
+                    // 和之前的next连接
+                    node -> next = next;
+                    next -> prev = node;
+                }
+            }
+            node = node -> next;
+        }
+        return head;
+    }
+};
+
+```
+```c++
+class Solution {
+public:
+    Node* flatten(Node* head) {
+        Node* p = nullptr;
+        stack<Node*> s;
+        if(head) s.push(head);
+        while(s.size()){
+            auto now = s.top(); s.pop();
+            if(p) p->next = now;
+            now->prev = p;
+            p = now;
+            if(p->next) s.push(p->next);
+            if(p->child) s.push(p->child);
+            p->child = nullptr;
+        }
+        return head;
+    }
+};
+class Solution {
+public:
+    Node* flatten(Node* head) {
+        stack<Node*> stk; //创建一个栈用来存放有child节点的下一个节点
+        Node* p = head;   //此指针循环遍历多级链表
+
+        if(!head)return head;//如果链表为空直接返回
+
+        while(p || !stk.empty()){    //当栈为空并且p的下一个节点为空时就退出循环
+            if(p->child){
+                if(p->next)stk.push(p->next);//如果是p->child不为空就将p的下一个节点入栈
+                p->child->prev = p;         //将孩子节点的前指针指向p
+                p->next = p->child;         //将p的next指针指向p的孩子节点
+                p->child = nullptr;         //将p的child指针指向空
+            }
+            if(p->next==nullptr&&!stk.empty()){     //如果指针下一个节点为空，看看栈中是否还有元素
+                p->next = stk.top();                //如果有元素说明这个多级双向链表并没有循环遍历完毕
+                stk.top()->prev = p;
+                stk.pop();
+            }
+            p = p->next;          
+        }
+        return head;
+    }
+};
+
+class Solution {
+public:
+    Node* flatten(Node* head) {
+        Node* node = head;
+        stack<Node*> s;
+        while(node != nullptr) {
+            // 孩子不为空
+            if(node -> child != nullptr) {
+                if(node -> next != nullptr) {
+                    s.push(node -> next);
+                }
+                Node* child = node -> child;
+                // 扁平化
+                node -> next = child;
+                child -> prev = node;
+                // 孩子要去掉
+                node -> child = nullptr;
+            }
+            if(node -> next == nullptr && !s.empty()) {
+                Node* next = s.top();
+                s.pop();
+                node -> next = next;
+                next -> prev = node;
+            }
+            node = node -> next;
+        }
+        return head;
+    }
+};
+
+```
+```c++
+class Solution {
+   Node* findTail(Node* head) {
+       if(head == nullptr || head->next == nullptr) return head;
+       Node* cur = head;
+       while(cur->next) cur = cur->next;
+       return cur;
+   }
+public:
+    Node* flatten(Node* head) {
+        Node* cur = head;
+        while(cur && cur->child == nullptr) cur = cur->next;
+        if (cur == nullptr) return head;
+        Node* newHead = flatten(cur->child);
+        Node* tailNode = findTail(newHead);
+        newHead->prev = cur;
+        if(cur->next) {
+            tailNode->next = cur->next;
+            cur->next->prev = tailNode;
+        }
+        cur->next = newHead;
+        cur->child = nullptr;
+        return head;
+    }
+};
+```
+
