@@ -490,4 +490,50 @@ public:
     }
 };
 ```
-### 
+###  剑指 Offer II 016. 不含重复字符的最长子字符串
+给定一个字符串 s ，请你找出其中不含有重复字符的 最长连续子字符串 的长度。
+示例 1:
+输入: s = "abcabcbb"
+输出: 3
+解释: 因为无重复字符的最长子字符串是 "abc"，所以其长度为 3。   
+```c++
+class Solution {
+public:
+    int lengthOfLongestSubstring(string s) {
+        unordered_map<char, int> umap;
+        int res = 0;
+        for (int i = 0, j = 0; i < s.size(); i++) {
+            umap[s[i]]++;
+            while(umap[s[i]] > 1) {
+                umap[s[j]]--;
+                j++;
+            }
+            res = max(res, i - j + 1);
+        }
+        return res;
+    }
+};
+```
+
+#### 剑指 Offer II 021. 删除链表的倒数第 n 个结点
+给定一个链表，删除链表的倒数第 n 个结点，并且返回链表的头结点。
+```c++
+class Solution {
+public:
+    ListNode* removeNthFromEnd(ListNode* head, int n) {
+        ListNode* dummy = new ListNode(0);
+        dummy->next = head;
+        ListNode* fast = head;
+        ListNode* slow = dummy;
+        for(int i = 0; i < n; i++) {
+            fast = fast->next;
+        }
+        while(fast) {
+            fast = fast->next;
+            slow = slow->next;
+        }
+        slow->next = slow->next->next;
+        return dummy->next;
+    }
+};
+```
