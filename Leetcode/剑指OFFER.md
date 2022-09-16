@@ -1207,7 +1207,22 @@ public:
 class Solution {
 public:
     int largestRectangleArea(vector<int>& heights) {
+        stack<int> st;
+        int res = 0;
+        st.push(0);
+        heights.insert(heights.begin(), 0);
+        heights.push_back(0);
         
+        for(int i = 1; i < heights.size(); i++) {
+            while(heights[i] < heights[st.top()]) {
+                int h = heights[st.top()];
+                st.pop();
+                int w = i - st.top() - 1;
+                res = max(res, w * h);
+            }
+            st.push(i);
+        }
+        return res;
     }
 };    
 ```
@@ -1215,11 +1230,89 @@ public:
 给定一个由 0 和 1 组成的矩阵 matrix ，找出只包含 1 的最大矩形，并返回其面积。
 
 注意：此题 matrix 输入格式为一维 01 字符串数组。
+```c++
+class Solution {
+public:
+   // Helper from LC 84
+        int largestRectangleArea(vector<int>& heights) {
+            heights.push_back(0);
+            int N = heights.size();
+            stack<int> stk;
+            int maxArea = 0;
+            for (int i = 0; i < N; i++) {
+                while (!stk.empty() && heights[i] < heights[stk.top()]) {
+                    auto height = heights[stk.top()];
+                    stk.pop();
+                    int width = stk.empty() ? i : i - stk.top() - 1;
+                    maxArea = max(maxArea, height * width);
+                }
+                
+                stk.push(i);
+            }  
+    
+            return maxArea;     
+        }
+
+    int maximalRectangle(vector<vector<char>>& matrix) {
+        if (matrix.empty() or matrix[0].empty()) {
+            return 0;
+        }
+        int maxArea = 0;
+        int m = matrix.size();
+        int n = matrix[0].size();
+        vector<int> heights(n, 0);
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (matrix[i][j] == '0') {
+                    heights[j] = 0;
+                } else {
+                    heights[j] += 1;
+                }
+            }
+            maxArea = max(maxArea, largestRectangleArea(heights));
+        }
+
+        return maxArea;
+    }
+};
+
+
+```
 ````c++
 class Solution {
 public:
-    int maximalRectangle(vector<string>& matrix) {
-
+    int largest(vector<int> heights) { // 不要传引用
+        stack<int> st;
+        int res = 0;
+        st.push(0);
+        heights.insert(heights.begin(), 0);
+        heights.push_back(0);
+        
+        for(int i = 1; i < heights.size(); i++) {
+            while(heights[i] < heights[st.top()]) {
+                int h = heights[st.top()];
+                st.pop();
+                int w = i - st.top() - 1;
+                res = max(res, w * h);
+            }
+            st.push(i);
+        }
+        return res;
+    }
+    int maximalRectangle(vector<vector<char>>& matrix) {
+        if(matrix.empty() || matrix[0].empty()) return 0;
+        int res = 0;
+        int m = matrix.size();
+        int n = matrix[0].size();
+        vector<int> heights(n, 0);
+        for(int i = 0; i < m; i++) {
+            for(int j = 0; j < n; j++) {
+                if (matrix[i][j] == '0') heights[j] = 0;
+                else heights[j]++;
+            }
+            res = max(res, largest(heights));
+        }
+        return res;
     }
 };
 ````
