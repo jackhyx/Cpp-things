@@ -1393,20 +1393,35 @@ CBTInserter.insert(int v)  向树中插入一个新节点，节点类型为 Tree
 CBTInserter.get_root() 将返回树的根节点。
 ```c++
 class CBTInserter {
+    vector<TreeNode*> vec;
 public:
     CBTInserter(TreeNode* root) {
-
+        queue<TreeNode*> que;
+        que.push(root);
+        while(!que.empty()) {
+            TreeNode* node = que.front();
+            que.pop();
+            vec.push_back(node);
+            if(node->left) que.push(node->left);
+            if (node->right) que.push(node->right);
+        }
     }
     
     int insert(int v) {
-
+        TreeNode* thisNode = new TreeNode(v);
+        vec.push_back(thisNode);
+        int n = vec.size();
+        TreeNode* father = vec[n / 2 - 1];
+        if (n % 2) {
+            father->right = thisNode;
+        } else father->left = thisNode;
+        return father->val;
     }
     
     TreeNode* get_root() {
-
+        return vec[0];
     }
 };
-
 ```
 #### 剑指 Offer II 044. 二叉树每层的最大值
 给定一棵二叉树的根节点 root ，请找出该二叉树中每一层的最大值。
@@ -1424,7 +1439,22 @@ public:
 class Solution {
 public:
     vector<int> largestValues(TreeNode* root) {
-
+        queue<TreeNode*> que;
+        vector<int> result;
+        if(root != nullptr) que.push(root);
+        while(!que.empty()) {
+            int size = que.size();
+            int maxVal = INT_MIN;
+            for(int i = 0; i < size; i++) {
+                TreeNode* node = que.front();
+                que.pop();
+                maxVal = max(maxVal, node->val);
+                if(node->left) que.push(node->left);
+                if (node->right) que.push(node->right);
+            }
+            result.push_back(maxVal);
+        }
+        return result;
     }
 };
 ```
@@ -1446,7 +1476,41 @@ public:
 class Solution {
 public:
     vector<int> rightSideView(TreeNode* root) {
+        queue<TreeNode*> que;
+        vector<int> result;
+        if(root != nullptr) que.push(root);
+        while(!que.empty()) {
+            int size = que.size();
+           
+            for(int i = 0; i < size; i++) {
+                TreeNode* node = que.front();
+                que.pop();
+                if(i == size - 1) result.push_back(node->val);
+               
+                if(node->left) que.push(node->left);
+                if (node->right) que.push(node->right);
+            }
+         
+        }
+        return result;
+    }
+};
+```
 
+#### 剑指 Offer II 047. 二叉树剪枝
+给定一个二叉树 根节点 root ，树的每个节点的值要么是 0，要么是 1。请剪除该二叉树中所有节点的值为 0 的子树。
+节点 node 的子树为 node 本身，以及所有 node 的后代。
+```c++
+class Solution {
+public:
+    TreeNode* pruneTree(TreeNode* root) {
+        if(root == nullptr) return nullptr;
+
+        root->left = pruneTree(root->left);
+        root->right = pruneTree(root->right);
+        if(root->val == 0 && root->left == nullptr && root->right == nullptr) return nullptr;
+
+        return root;
     }
 };
 ```
