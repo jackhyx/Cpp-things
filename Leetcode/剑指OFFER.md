@@ -1466,7 +1466,48 @@ public:
 class Solution {
 public:
     int findBottomLeftValue(TreeNode* root) {
-
+        queue<TreeNode*> que;
+        que.push(root);
+        int bottomLeft = 0;
+        while (!que.empty()) {
+            int size = que.size();
+            for (int i = 0; i < size; ++i) {
+                TreeNode* node = que.front();
+                que.pop();
+                if (i == 0) {
+                    bottomLeft = node->val;
+                }
+                if (node->left != nullptr) {
+                    que.push(node->left);
+                }
+                if (node->right != nullptr) {
+                    que.push(node->right);
+                }
+            }
+        }    
+        return bottomLeft;   
+    }
+};
+```
+```c++
+class Solution {
+public:
+    int findBottomLeftValue(TreeNode* root) {
+        if (root == nullptr) return 0;
+        queue<TreeNode*> que;
+        int res = 0;
+        if(root) que.push(root);
+        while(!que.empty()) {
+            int size = que.size();
+            for(int i = 0; i < size; i++) {
+                TreeNode* node = que.front();
+                que.pop();
+                if (i == 0) res = node->val;
+                if(node->left) que.push(node->left);
+                if(node->right) que.push(node->right);
+            }
+        }
+        return res;
     }
 };
 ```
@@ -1544,9 +1585,39 @@ public:
 叶节点 是指没有子节点的节点。
 ```c++
 class Solution {
+    int result;
+    vector<int> path;
+    int vecortToInt(vector<int>& vec) {
+        int sum = 0;
+        for(int i = 0; i < vec.size(); i++) {
+            sum = sum * 10 + vec[i];
+        } 
+        return sum;
+    }
+    void traverse(TreeNode* cur) {
+        if(!cur->left && !cur->right) {
+            result += vecortToInt(path);
+            return;
+        }
+        if(cur->left) {
+            path.push_back(cur->left->val);
+            traverse(cur->left);
+            path.pop_back();
+        }
+        if(cur->right) {
+            path.push_back(cur->right->val);
+            traverse(cur->right);
+            path.pop_back();
+        }
+        return ;
+    }
 public:
     int sumNumbers(TreeNode* root) {
-
+        path.clear();
+        if(root == nullptr) return 0;
+        path.push_back(root->val);
+        traverse(root);
+        return result;
     }
 };
 ```
