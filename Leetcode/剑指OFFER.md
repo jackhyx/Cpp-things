@@ -1625,11 +1625,875 @@ public:
 给定一个二叉树的根节点 root ，和一个整数 targetSum ，求该二叉树里节点值之和等于 targetSum 的 路径 的数目。
 路径 不需要从根节点开始，也不需要在叶子节点结束，但是路径方向必须是向下的（只能从父节点到子节点）。
 ```c++
- */
 class Solution {
+    int count = 0;
+    void traverse(TreeNode* cur, long long sum) {
+        if (sum == 0) count++;
+        if (cur->left) traverse(cur->left, sum - cur->left->val);
+        if (cur->right) traverse(cur->right, sum - cur->right->val);
+    }
 public:
     int pathSum(TreeNode* root, int targetSum) {
+        if (root == nullptr) return 0;
+        traverse(root, targetSum - root->val);
+        pathSum(root->left, targetSum);
+        pathSum(root->right, targetSum);
+        return count;
+    }
+};
+```
+#### 剑指 Offer II 053. 二叉搜索树中的中序后继
+给定一棵二叉搜索树和其中的一个节点 p ，找到该节点在树中的中序后继。如果节点没有中序后继，请返回 null 。
+节点 p 的后继是值比 p.val 大的节点中键值最小的节点，即按中序遍历的顺序节点 p 的下一个节点。
+
+示例 1：
+
+输入：root = [2,1,3], p = 1
+输出：2
+解释：这里 1 的中序后继是 2。请注意 p 和返回值都应是 TreeNode 类型。
+```c++
+class Solution {
+public:
+    TreeNode* inorderSuccessor(TreeNode* root, TreeNode* p) {
+        stack<TreeNode*> st;
+        TreeNode *prev = nullptr, *curr = root;
+        while (!st.empty() || curr != nullptr) {
+            while (curr != nullptr) {
+                st.emplace(curr);
+                curr = curr->left;
+            }
+            curr = st.top();
+            st.pop();
+            if (prev == p) {
+                return curr;
+            }
+            prev = curr;
+            curr = curr->right;
+        }
+        return nullptr;
+    }
+};
+
+
+```
+```c++
+class Solution {
+public:
+    TreeNode* inorderSuccessor(TreeNode* root, TreeNode* p) {
+        TreeNode *successor = nullptr;
+        if (p->right != nullptr) {
+            successor = p->right;
+            while (successor->left != nullptr) {
+                successor = successor->left;
+            }
+            return successor;
+        }
+        TreeNode *node = root;
+        while (node != nullptr) {
+            if (node->val > p->val) {
+                successor = node;
+                node = node->left;
+            } else {
+                node = node->right;
+            }
+        }
+        return successor;
+    }
+};
+
+class Solution {
+public:
+    TreeNode* inorderSuccessor(TreeNode* root, TreeNode* p) {
+        TreeNode* node = root;
+        TreeNode* ans = nullptr;
+
+        while(node){
+            if(p->val < node->val){
+                ans = node;
+                node = node->left;
+            }
+            else{
+                node = node->right;
+            }
+        }
+
+        return ans;
+    }
+};
+class Solution {
+public:
+    TreeNode* inorderSuccessor(TreeNode* root, TreeNode* p) {
+        if (!root) return root;
+
+        if (root -> val <= p -> val) 
+            return inorderSuccessor(root -> right, p);
+        
+        auto left = inorderSuccessor(root -> left, p);
+        return !left ? root : left;
+    }
+};
+```
+```c++
+class Solution {
+public:
+    TreeNode* inorderSuccessor(TreeNode* root, TreeNode* p) {
+        TreeNode* node = root;
+        TreeNode* ret = nullptr;
+        while(node) {
+            if(node->val > p->val) {
+                ret = node;
+                node = node->left;
+            } else node = node->right;
+        }
+        return ret;
+    }
+};
+```
+#### 剑指 Offer II 054. 所有大于等于节点的值之和
+给定一个二叉搜索树，请将它的每个节点的值替换成树中大于或者等于该节点值的所有节点值之和。
+
+提醒一下，二叉搜索树满足下列约束条件：
+
+节点的左子树仅包含键 小于 节点键的节点。
+节点的右子树仅包含键 大于 节点键的节点。
+左右子树也必须是二叉搜索树。
+```c++
+class Solution { 
+private:
+    int pre; // 记录前一个节点的数值
+    void traversal(TreeNode* cur) { // 右中左遍历
+        stack<TreeNode*> st;
+        while(cur != nullptr || !st.empty()) {
+            if (cur != nullptr) {
+                st.push(cur);
+                cur = cur->right;
+            } else {
+                cur = st.top();
+                st.pop();
+                cur->val += pre;
+                pre = cur->val;
+                cur = cur->left;
+            }
+        }
+    }
+public:
+    TreeNode* convertBST(TreeNode* root) {
+       pre = 0;
+       traversal(root);
+       return root;
+    }
+};
+```
+#### 剑指 Offer II 055. 二叉搜索树迭代器
+实现一个二叉搜索树迭代器类BSTIterator ，表示一个按中序遍历二叉搜索树（BST）的迭代器：
+
+BSTIterator(TreeNode root) 初始化 BSTIterator 类的一个对象。BST 的根节点 root 会作为构造函数的一部分给出。指针应初始化为一个不存在于 BST 中的数字，且该数字小于 BST 中的任何元素。
+boolean hasNext() 如果向指针右侧遍历存在数字，则返回 true ；否则返回 false 。
+int next()将指针向右移动，然后返回指针处的数字。
+注意，指针初始化为一个不存在于 BST 中的数字，所以对 next() 的首次调用将返回 BST 中的最小元素。
+可以假设 next() 调用总是有效的，也就是说，当调用 next() 时，BST 的中序遍历中至少存在一个下一个数字。
+```c++
+class BSTIterator {
+    stack<TreeNode* > st;
+    TreeNode* cur;
+    int res;
+public:
+    BSTIterator(TreeNode* root) {
+        cur = root;
+    }
+    int next() {
+        while(cur) {
+            st.push(cur);
+            cur = cur->left;
+        } 
+        cur = st.top();
+        st.pop();
+        res = cur->val;
+        cur = cur->right;
+        return res;
+        }
+    bool hasNext() {
+        return cur || !st.empty();
+    }
+};
+/**
+ * Your BSTIterator object will be instantiated and called as such:
+ * BSTIterator* obj = new BSTIterator(root);
+ * int param_1 = obj->next();
+ * bool param_2 = obj->hasNext();
+ */
+```
+#### 剑指 Offer II 058. 日程表 二分 & 线段树
+请实现一个 MyCalendar 类来存放你的日程安排。如果要添加的时间内没有其他安排，则可以存储这个新的日程安排。
+MyCalendar 有一个 book(int start, int end)方法。它意味着在 start 到 end 时间内增加一个日程安排，注意，这里的时间是半开区间，即 [start, end), 实数 x 的范围为，  start <= x < end。
+当两个日程安排有一些时间上的交叉时（例如两个日程安排都在同一时间内），就会产生重复预订。
+每次调用 MyCalendar.book方法时，如果可以将日程安排成功添加到日历中而不会导致重复预订，返回 true。否则，返回 false 并且不要将该日程安排添加到日历中。
+请按照以下步骤调用 MyCalendar 类: MyCalendar cal = new MyCalendar(); MyCalendar.book(start, end)
+
+示例:
+输入:
+["MyCalendar","book","book","book"]
+[[],[10,20],[15,25],[20,30]]
+输出: [null,true,false,true]
+解释:
+MyCalendar myCalendar = new MyCalendar();
+MyCalendar.book(10, 20); // returns true
+MyCalendar.book(15, 25); // returns false ，第二个日程安排不能添加到日历中，因为时间 15 已经被第一个日程安排预定了
+MyCalendar.book(20, 30); // returns true ，第三个日程安排可以添加到日历中，因为第一个日程安排并不包含时间 20
+在从小到大的排序数组中，
+
+lower_bound( begin,end,num)：从数组的begin位置到end-1位置二分查找第一个大于或等于num的数字，找到返回该数字的地址，不存在则返回end。通过返回的地址减去起始地址begin,得到找到数字在数组中的下标。
+
+upper_bound( begin,end,num)：从数组的begin位置到end-1位置二分查找第一个大于num的数字，找到返回该数字的地址，不存在则返回end。通过返回的地址减去起始地址begin,得到找到数字在数组中的下标。
+
+```c++
+class MyCalendar {
+    set<pair<int, int>> booked;
+
+public:
+    MyCalendar() {
+
+    }
+    bool book(int start, int end) {
+        auto it = booked.lower_bound({end, 0});
+        if (it == booked.begin() || (--it)->second <= start) {
+            booked.emplace(start, end);
+            return true;
+        }
+        return false;
+    }
+};
+
+class MyCalendar {
+    map<int, int> booked;//<end, start>
+public:
+    MyCalendar() {
     
+    }
+    
+    bool book(int start, int end) {
+        auto it = c.upper_bound(start);
+        if(it->second >= end || t == booked.end()){
+            booked.insert(make_pair(end, start));
+            return true;
+        }
+        return false;
+    }
+};
+
+```
+```c++
+class MyCalendar {
+public:
+    MyCalendar() {
+
+    }
+    
+    bool book(int start, int end) {
+
+    }
+};
+
+/**
+ * Your MyCalendar object will be instantiated and called as such:
+ * MyCalendar* obj = new MyCalendar();
+ * bool param_1 = obj->book(start,end);
+ */
+```
+#### 剑指 Offer II 060. 出现频率最高的 k 个数字 ** 
+给定一个整数数组 nums 和一个整数 k ，请返回其中出现频率前 k 高的元素。可以按 任意顺序 返回答案。
+
+示例 1:
+输入: nums = [1,1,1,2,2,3], k = 2
+输出: [1,2]
+示例 2:
+输入: nums = [1], k = 1
+输出: [1]
+提示：
+1 <= nums.length <= 105
+k 的取值范围是 [1, 数组中不相同的元素的个数]
+题目数据保证答案唯一，换句话说，数组中前 k 个高频元素的集合是唯一的
+
+* 进阶：所设计算法的时间复杂度 必须 优于 O(n log n) ，其中 n 是数组大小。
+```c++
+class Solution {
+public:
+    vector<int> topKFrequent(vector<int>& nums, int k) {
+
+    }
+};
+```
+#### 剑指 Offer II 061. 和最小的 k 个数对
+给定两个以升序排列的整数数组 nums1 和 nums2 , 以及一个整数 k 。
+
+定义一对值 (u,v)，其中第一个元素来自 nums1，第二个元素来自 nums2 。
+
+请找到和最小的 k 个数对 (u1,v1),  (u2,v2)  ...  (uk,vk) 。
+
+示例 1:
+
+输入: nums1 = [1,7,11], nums2 = [2,4,6], k = 3
+输出: [1,2],[1,4],[1,6]
+解释: 返回序列中的前 3 对数：
+[1,2],[1,4],[1,6],[7,2],[7,4],[11,2],[7,6],[11,4],[11,6]
+
+提示:
+1 <= nums1.length, nums2.length <= 104
+-109 <= nums1[i], nums2[i] <= 109
+nums1, nums2 均为升序排列
+1 <= k <= 1000
+```c++
+class Solution {
+public:
+    vector<vector<int>> kSmallestPairs(vector<int>& nums1, vector<int>& nums2, int k) {
+
+    }
+};
+```
+#### 剑指 Offer II 062. 实现前缀树
+Trie（发音类似 "try"）或者说 前缀树 是一种树形数据结构，用于高效地存储和检索字符串数据集中的键。这一数据结构有相当多的应用情景，例如自动补完和拼写检查。
+
+请你实现 Trie 类：
+
+Trie() 初始化前缀树对象。
+void insert(String word) 向前缀树中插入字符串 word 。
+boolean search(String word) 如果字符串 word 在前缀树中，返回 true（即，在检索之前已经插入）；否则，返回 false 。
+boolean startsWith(String prefix) 如果之前已经插入的字符串 word 的前缀之一为 prefix ，返回 true ；否则，返回 false 。
+示例：
+输入
+inputs = ["Trie", "insert", "search", "search", "startsWith", "insert", "search"]
+inputs = [[], ["apple"], ["apple"], ["app"], ["app"], ["app"], ["app"]]
+输出
+[null, null, true, false, true, null, true]
+解释
+Trie trie = new Trie();
+trie.insert("apple");
+trie.search("apple");   // 返回 True
+trie.search("app");     // 返回 False
+trie.startsWith("app"); // 返回 True
+trie.insert("app");
+trie.search("app");     // 返回 True
+
+提示：
+1 <= word.length, prefix.length <= 2000
+word 和 prefix 仅由小写英文字母组成
+insert、search 和 startsWith 调用次数 总计 不超过 3 * 104 次
+```c++
+class Trie {
+private:
+    vector<Trie*> children;
+    bool isEnd;
+
+    Trie* searchPrefix(string prefix) {
+        Trie* node = this;
+        for (char ch : prefix) {
+            ch -= 'a';
+            if (node->children[ch] == nullptr) {
+                return nullptr;
+            }
+            node = node->children[ch];
+        }
+        return node;
+    }
+public:
+    Trie() : children(26), isEnd(false) {}
+
+    void insert(string word) {
+        Trie* node = this;
+        for (char ch : word) {
+            ch -= 'a';
+            if (node->children[ch] == nullptr) {
+                node->children[ch] = new Trie();
+            }
+            node = node->children[ch];
+        }
+        node->isEnd = true;
+    }
+
+    bool search(string word) {
+        Trie* node = this->searchPrefix(word);
+        return node != nullptr && node->isEnd;
+    }
+
+    bool startsWith(string prefix) {
+        return this->searchPrefix(prefix) != nullptr;
+    }
+};
+
+class Trie {
+    bool isEnd;//结束符，用来表示到当前点为一个字符串
+    vector<Trie*>ch;//用节点当做数组元素
+public:
+    Trie():isEnd(false),ch(26){}//26个字母，26个节点
+    
+    void insert(string word) 
+    {
+       Trie* cur=this;//当前操作节点设置为root
+       for(char c:word)//局部循环，用变量c来表示Word中的每个字符
+       {
+           c-='a';//用字符做下标来查找对应的节点
+           if(cur->ch[c]==nullptr) cur->ch[c]=new Trie();//在当前操作节点cur下没找到向对应字符的节点，即创建一个
+           cur=cur->ch[c];//找到对应节点，就把cur移动到找到的节点,继续循环查找
+       }
+       cur->isEnd=true;//插入最后一个字符，把这个字符节点的isEnd设置为true，即说明到当前节点为一个单词
+    }
+    
+    bool search(string word) 
+    {
+        Trie* cur=this;
+        for(char c:word)
+        {
+            c-='a';
+            if(cur->ch[c]==nullptr) return false;//只要一个字符没查找到就是没有匹配到，返回false
+            cur=cur->ch[c];
+        }
+        return cur->isEnd;//查找到最后一个字符节点，检查是否有结束符
+    }
+    
+    bool startsWith(string prefix) 
+    {
+        Trie* cur=this;
+        for(char c:prefix)
+        {
+            c-='a';
+            if(cur->ch[c]==nullptr) return false;//只要一个字符没查找到就是没有匹配到，返回false
+            cur=cur->ch[c];
+        }
+        return true;//这里查找的是是否存在几个字符，而并非是一个带结束符的字符串，所以只需返回查找结果
+    }
+};
+```
+```c++
+class Trie {
+private:
+    struct TrieNode //26叉树结构体，结构体中包含它自己，即每一个子树又是一个26叉树
+    {
+        bool isWord;
+        vector<shared_ptr<TrieNode>> children;
+        TrieNode():isWord(false), children(26, nullptr){}   //成员列表初始化
+    };
+
+    shared_ptr<TrieNode> findPrefix(string& prefix)         //查找前缀的方法
+    {
+        auto node = root;
+        for (int i = 0; i < prefix.length() && node != nullptr; ++ i)
+        {
+            node = node->children[prefix[i] - 'a'];
+        }
+        return node;            //若是前缀就返回最后一个字母所在的node，否则返回nullptr
+    }
+
+    shared_ptr<TrieNode> root;  
+
+public:
+    Trie() {
+        root = make_shared<TrieNode>();     //初始化智能指针
+    }
+    
+    //往前缀树中插入单词
+    void insert(string word) {
+        auto node = root;           //node为当前节点，从头节点开始
+        for (auto &ch : word)       //遍历每个字母，若字母对应的节点不存在，则创建它
+        {
+            if (node->children[ch - 'a'] == nullptr)
+            {
+                node->children[ch - 'a'] = make_shared<TrieNode>();
+            }
+
+            node = node->children[ch - 'a'];    //进入到对应的子树节点中，开始下一轮插入
+        }
+
+        node->isWord = true;        //整个单词遍历完后，将最后一个节点标记为单词结尾
+    }
+    
+    //前缀树中查找单词
+    bool search(string word) {
+        auto node = findPrefix(word);
+        return node != nullptr && node->isWord == true;
+    }
+    
+    //前缀树中查找前缀
+    bool startsWith(string prefix) {
+        return findPrefix(prefix) != nullptr;
+    }
+};
+```
+
+```c++
+class Trie {
+    bool isEnd;
+    vector<Trie*> ch;
+public:
+    /** Initialize your data structure here. */
+    Trie(): isEnd(false), ch(26){
+    }
+    
+    /** Inserts a word into the trie. */
+    void insert(string word) {
+        Trie* cur = this;
+        for(char c : word) {
+            c -= 'a';
+            if (!cur->ch[c]) cur->ch[c] = new Trie();
+            cur = cur->ch[c];
+        }
+        cur->isEnd = true;
+    }
+    
+    /** Returns if the word is in the trie. */
+    bool search(string word) {
+        Trie* cur = this;
+        for(char c : word) {
+            c -= 'a';
+            if(!cur->ch[c]) return false;
+            cur = cur->ch[c];
+        }
+        return cur->isEnd;
+    }
+    
+    /** Returns if there is any word in the trie that starts with the given prefix. */
+    bool startsWith(string prefix) {
+         Trie* cur = this;
+        for(char c : prefix) {
+            c -= 'a';
+            if(!cur->ch[c]) return false;
+            cur = cur->ch[c];
+        }
+        return true;
+    }
+};
+
+```
+
+#### 剑指 Offer II 063. 替换单词
+在英语中，有一个叫做 词根(root) 的概念，它可以跟着其他一些词组成另一个较长的单词——我们称这个词为 继承词(successor)。例如，词根an，跟随着单词 other(其他)，可以形成新的单词 another(另一个)。
+现在，给定一个由许多词根组成的词典和一个句子，需要将句子中的所有继承词用词根替换掉。如果继承词有许多可以形成它的词根，则用最短的词根替换它。
+需要输出替换之后的句子。
+
+示例 1：
+
+输入：dictionary = ["cat","bat","rat"], sentence = "the cattle was rattled by the battery"
+输出："the cat was rat by the bat"
+```c++
+class Solution {
+    struct Trie {
+        bool isEnd;
+        vector<Trie*> children;
+        Trie() : isEnd(false), children(26, NULL){}
+    };
+
+    string searhPrefix(Trie* root, const string& word) {
+        Trie* cur = root;
+        string res;
+        for (char c : word) {
+            if (cur->children[c - 'a'] == NULL) {
+                return "isNotMatch";
+            }
+            res += c;
+            cur = cur->children[c - 'a'];
+            if (cur->isEnd == true) return res;
+        }
+        return "isNotMatch";
+    }
+public:
+    string replaceWords(vector<string>& dictionary, string sentence) {
+        // 构建前缀树Trie
+        Trie* root = new Trie();
+        for (string& str : dictionary) {
+            Trie* cur = root;
+            for (char c : str) {
+                if (cur->children[c - 'a'] == NULL) {
+                    cur->children[c - 'a'] = new Trie();
+                }
+                cur = cur->children[c - 'a'];
+            }
+            cur->isEnd = true;
+        }
+        // 分割字符串
+        string word, res;
+        stringstream input(sentence);
+        while (input >> word) {
+            // 查找前缀prefix
+            string prefix = searhPrefix(root, word);
+            if (prefix != "isNotMatch") {
+                res += prefix;
+            } else {
+                res += word;
+            }
+            res += " ";
+        }
+        res.pop_back();
+        return res;
+    }
+};
+```
+```c++
+class Solution {
+    struct Trie {
+        bool isEnd;
+        vector<Trie*> children;
+        Trie() : isEnd(false), children(26, NULL){}
+    };
+
+    string searhPrefix(Trie* root, const string& word) {
+        Trie* cur = root;
+        string res;
+        for (char c : word) {
+            if (!cur->children[c - 'a']) {
+                return " ";
+            }
+            res += c;
+            cur = cur->children[c - 'a'];
+            if (cur->isEnd) return res;
+        }
+        return " ";
+    }
+public:
+    string replaceWords(vector<string>& dictionary, string sentence) {
+        // 构建前缀树Trie
+        Trie* root = new Trie();
+        for (string& str : dictionary) {
+            Trie* cur = root;
+            for (char c : str) {
+                if (!cur->children[c - 'a']) {
+                    cur->children[c - 'a'] = new Trie();
+                }
+                cur = cur->children[c - 'a'];
+            }
+            cur->isEnd = true;
+        }
+        // 分割字符串
+        string word, res;
+        stringstream input(sentence);
+        while (input >> word) {
+            // 查找前缀prefix
+            string prefix = searhPrefix(root, word);
+            if (prefix != " ") {
+                res += prefix;
+            } else {
+                res += word;
+            }
+            res += " ";
+        }
+        res.pop_back();
+        return res;
+    }
+};
+```
+```c++
+class Solution {
+public:
+    string replaceWords(vector<string>& dictionary, string sentence) {
+
+    }
+};
+```
+#### 剑指 Offer II 064. 神奇的字典
+设计一个使用单词列表进行初始化的数据结构，单词列表中的单词 互不相同 。 如果给出一个单词，请判定能否只将这个单词中一个字母换成另一个字母，使得所形成的新单词存在于已构建的神奇字典中。
+
+实现 MagicDictionary 类：
+
+MagicDictionary() 初始化对象
+void buildDict(String[] dictionary) 使用字符串数组 dictionary 设定该数据结构，dictionary 中的字符串互不相同
+bool search(String searchWord) 给定一个字符串 searchWord ，判定能否只将字符串中 一个 字母换成另一个字母，使得所形成的新字符串能够与字典中的任一字符串匹配。如果可以，返回 true ；否则，返回 false 。
+
+示例：
+
+输入
+inputs = ["MagicDictionary", "buildDict", "search", "search", "search", "search"]
+inputs = [[], [["hello", "leetcode"]], ["hello"], ["hhllo"], ["hell"], ["leetcoded"]]
+输出
+[null, null, false, true, false, false]
+解释
+MagicDictionary magicDictionary = new MagicDictionary();
+magicDictionary.buildDict(["hello", "leetcode"]);
+magicDictionary.search("hello"); // 返回 False
+magicDictionary.search("hhllo"); // 将第二个 'h' 替换为 'e' 可以匹配 "hello" ，所以返回 True
+magicDictionary.search("hell"); // 返回 False
+magicDictionary.search("leetcoded"); // 返回 False
+
+提示：
+1 <= dictionary.length <= 100
+1 <= dictionary[i].length <= 100
+dictionary[i] 仅由小写英文字母组成
+dictionary 中的所有字符串 互不相同
+1 <= searchWord.length <= 100
+searchWord 仅由小写英文字母组成
+buildDict 仅在 search 之前调用一次
+最多调用 100 次 search
+```c++
+class TrieNode {
+public:
+    bool isWord;
+    vector<TrieNode*> children;
+    TrieNode(): isWord(false), children(26, nullptr) {}
+    ~TrieNode() {
+        for(TrieNode* child : children) {
+            if(child) delete child;
+        }
+    }; 
+};
+
+class MagicDictionary {
+    TrieNode *root;
+    void add(string &word) {
+        TrieNode* cur = root;
+        for(auto ch : word) {
+            int index = ch - 'a';
+            if(!cur->children[index]) cur->children[index] = new TrieNode();
+            cur = cur->children[index];
+        }
+        cur->isWord = true;
+    }
+    bool find(TrieNode *cur, string &word, int index, bool isMod) {
+        if (cur == nullptr) return false;
+        if(word.size() == index) return isMod && cur->isWord;
+        else {
+            for(int i = 0; i < 26; i++) {
+                if(cur->children[i]) {
+                    if('a' + i == word[index] ) {
+                        if(find(cur->children[i], word, index + 1, isMod)) return true;
+                    } 
+                    else if(isMod == false && find(cur->children[i], word, index + 1, true)) return true;
+                }
+            }
+            return false;
+        }
+    }
+public:
+    bool idWord;
+    /** Initialize your data structure here. */
+    MagicDictionary() {
+        root = new TrieNode();
+    }
+    
+    void buildDict(vector<string> dictionary) {
+        for(auto &word : dictionary) {
+            add(word);
+        }
+    }
+    
+    bool search(string searchWord) {
+        return find(root, searchWord, 0, false);
+    }
+};
+
+
+/**
+ * Your MagicDictionary object will be instantiated and called as such:
+ * MagicDictionary* obj = new MagicDictionary();
+ * obj->buildDict(dictionary);
+ * bool param_2 = obj->search(searchWord);
+ */
+```
+#### 剑指 Offer II 065. 最短的单词编码
+单词数组 words 的 有效编码 由任意助记字符串 s 和下标数组 indices 组成，且满足：
+
+words.length == indices.length
+助记字符串 s 以 '#' 字符结尾
+对于每个下标 indices[i] ，s 的一个从 indices[i] 开始、到下一个 '#' 字符结束（但不包括 '#'）的 子字符串 恰好与 words[i] 相等
+给定一个单词数组 words ，返回成功对 words 进行编码的最小助记字符串 s 的长度 。
+
+示例 1：
+输入：words = ["time", "me", "bell"]
+输出：10
+解释：一组有效编码为 s = "time#bell#" 和 indices = [0, 2, 5] 。
+words[0] = "time" ，s 开始于 indices[0] = 0 到下一个 '#' 结束的子字符串，如加粗部分所示 "time#bell#"
+words[1] = "me" ，s 开始于 indices[1] = 2 到下一个 '#' 结束的子字符串，如加粗部分所示 "time#bell#"
+words[2] = "bell" ，s 开始于 indices[2] = 5 到下一个 '#' 结束的子字符串，如加粗部分所示 "time#bell#"
+示例 2：
+输入：words = ["t"]
+输出：2
+解释：一组有效编码为 s = "t#" 和 indices = [0] 。
+
+提示：
+1 <= words.length <= 2000
+1 <= words[i].length <= 7
+words[i] 仅由小写字母组成
+```c++
+class Solution {
+public:
+    int minimumLengthEncoding(vector<string>& words) {
+
+    }
+};
+```
+#### 剑指 Offer II 066. 单词之和
+实现一个 MapSum 类，支持两个方法，insert 和 sum：
+
+MapSum() 初始化 MapSum 对象
+void insert(String key, int val) 插入 key-val 键值对，字符串表示键 key ，整数表示值 val 。如果键 key 已经存在，那么原来的键值对将被替代成新的键值对。
+int sum(string prefix) 返回所有以该前缀 prefix 开头的键 key 的值的总和。
+示例：
+
+输入：
+inputs = ["MapSum", "insert", "sum", "insert", "sum"]
+inputs = [[], ["apple", 3], ["ap"], ["app", 2], ["ap"]]
+输出：
+[null, null, 3, null, 5]
+
+解释：
+MapSum mapSum = new MapSum();
+mapSum.insert("apple", 3);  
+mapSum.sum("ap");           // return 3 (apple = 3)
+mapSum.insert("app", 2);    
+mapSum.sum("ap");           // return 5 (apple + app = 3 + 2 = 5)
+提示：
+
+1 <= key.length, prefix.length <= 50
+key 和 prefix 仅由小写英文字母组成
+1 <= val <= 1000
+最多调用 50 次 insert 和 sum
+```c++
+class MapSum {
+public:
+    /** Initialize your data structure here. */
+    MapSum() {
+
+    }
+    
+    void insert(string key, int val) {
+
+    }
+    
+    int sum(string prefix) {
+
+    }
+};
+
+/**
+ * Your MapSum object will be instantiated and called as such:
+ * MapSum* obj = new MapSum();
+ * obj->insert(key,val);
+ * int param_2 = obj->sum(prefix);
+ */
+```
+#### 剑指 Offer II 067. 最大的异或
+给你一个整数数组 nums ，返回 nums[i] XOR nums[j] 的最大运算结果，其中 0 ≤ i ≤ j < n 。
+
+```c++
+
+```
+
+示例 1：
+
+输入：nums = [3,10,5,25,2,8]
+输出：28
+解释：最大运算结果是 5 XOR 25 = 28.
+示例 2：
+
+输入：nums = [14,70,53,83,49,91,36,80,92,51,66,70]
+输出：127
+
+
+提示：
+
+1 <= nums.length <= 2 * 105
+0 <= nums[i] <= 231 - 1
+```c++
+class Solution {
+public:
+    int findMaximumXOR(vector<int>& nums) {
+
     }
 };
 ```
