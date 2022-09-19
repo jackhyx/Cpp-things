@@ -2411,9 +2411,36 @@ words[2] = "bell" ，s 开始于 indices[2] = 5 到下一个 '#' 结束的子字
 words[i] 仅由小写字母组成
 ```c++
 class Solution {
+    struct Trie {
+        vecotr<Trie*> children;
+        Trie(): children(26, nullptr) {}
+    };
+    int insert(Trie* root, string &word) {
+        Trie* cur = root;
+        bool isNew = false;
+        for(int i= word.size() - 1; i >= 0; i--) {
+            int index = word[i] - 'a';
+            if(!cur->children[index]) {
+                cur->children[index] = new Trie();
+                isNew = true;
+            }
+            cur = cur->children;
+        }
+        return isNew? word.size() + 1 : 0;
+        
+    }
 public:
     int minimumLengthEncoding(vector<string>& words) {
-
+        Trie* root = new  Trie();
+        auto cmp = [](const auto& a, const auto& b) {
+            return a.size() > b.size();
+        };
+        sort(words.begin(), words.end(), cmp);
+        int res = 0;
+        for(auto & word : words) {
+            res += insert(root, word);
+        }
+        return res;
     }
 };
 ```
@@ -2496,6 +2523,139 @@ public:
 
     }
 };
+```
+#### 剑指 Offer II 070. 排序数组中只出现一次的数字
+给定一个只包含整数的有序数组 nums ，每个元素都会出现两次，唯有一个数只会出现一次，请找出这个唯一的数字。
+你设计的解决方案必须满足 O(log n) 时间复杂度和 O(1) 空间复杂度。
+
+示例 1:
+输入: nums = [1,1,2,3,3,4,4,8,8]
+输出: 2
+示例 2:
+
+输入: nums =  [3,3,7,7,10,11,11]
+输出: 10
+
+提示:
+
+1 <= nums.length <= 105
+0 <= nums[i] <= 105
+```c++
+class Solution {
+public:
+    int singleNonDuplicate(vector<int>& nums) {
+
+    }
+};
+
+
+
+```
+##### 剑指 Offer II 071. 按权重生成随机数 * 前缀和 + 二分
+给定一个正整数数组 w ，其中 w[i] 代表下标 i 的权重（下标从 0 开始），请写一个函数 pickIndex ，它可以随机地获取下标 i，选取下标 i 的概率与 w[i] 成正比。
+
+例如，对于 w = [1, 3]，挑选下标 0 的概率为 1 / (1 + 3) = 0.25 （即，25%），而选取下标 1 的概率为 3 / (1 + 3) = 0.75（即，75%）。
+
+也就是说，选取下标 i 的概率为 w[i] / sum(w) 。
+
+
+```c++
+// 二分搜索优化
+
+class Solution {
+public:
+    int range = 0;
+    vector<int> weights;
+
+    Solution(vector<int>& w) {
+        for (auto w_ : w) {
+            range += w_;
+            weights.push_back(range);
+        }
+    }
+    
+    int pickIndex() {
+        int rnd = rand() % range;
+
+        int left = 0;
+        int right = weights.size() - 1;
+
+        while (left < right) {
+            int mid = left + (right - left) / 2;
+            if (rnd < weights[mid]) {
+                right = mid;
+            } else {
+                left = mid + 1;
+            }
+        }
+
+        return left;
+    }
+};
+
+/**
+ * Your Solution object will be instantiated and called as such:
+ * Solution* obj = new Solution(w);
+ * int param_1 = obj->pickIndex();
+ */
+
+
+```
+```c++
+class Solution {
+private:
+    vector<int> sums;                       //sums为前缀和数组
+    int total = 0;
+
+public:
+    Solution(vector<int>& w) {
+        sums.resize(w.size());
+        for (int i = 0; i < w.size(); ++ i) //构造前缀和数组
+        {
+            total += w[i];
+            sums[i] = total;
+        }
+    }
+    
+    int pickIndex() {
+        int rnd = rand() % total;           //生成最大值范围内的随机数
+        int left = 0, right = sums.size() - 1;
+
+        while (left < right)                //二分法在前缀和数组中找到第一个大于随机数的元素下标
+        {
+            int mid = left + (right - left) / 2;
+            if (rnd < sums[mid])            
+            {
+                right = mid;
+            }
+            else
+            {
+                left = mid + 1;
+            }
+        }
+        return left;
+    }
+};
+```
+
+```c++
+    vector<vector<int>> merge(vector<vector<int>>& intervals) {
+        sort(intervals.begin(), intervals.end());
+        vector<vector<int>> ans;
+        for (int i = 0; i < intervals.size();) {
+            int t = intervals[i][1];
+            int j = i + 1;
+            while (j < intervals.size() && intervals[j][0] <= t) {
+                t = max(t, intervals[j][1]);
+                j++;
+            }
+            ans.push_back({ intervals[i][0], t });
+            i = j;
+        }
+        return ans;
+    }
+
+
 ```
 29. 两数相除
     给定两个整数，被除数 dividend 和除数 divisor。将两数相除，要求不使用乘法、除法和 mod 运算符。
