@@ -2524,7 +2524,7 @@ public:
     }
 };
 ```
-#### 剑指 Offer II 070. 排序数组中只出现一次的数字
+#### 剑指 Offer II 070. 排序数组中只出现一次的数字 * 二分
 给定一个只包含整数的有序数组 nums ，每个元素都会出现两次，唯有一个数只会出现一次，请找出这个唯一的数字。
 你设计的解决方案必须满足 O(log n) 时间复杂度和 O(1) 空间复杂度。
 
@@ -2547,9 +2547,6 @@ public:
 
     }
 };
-
-
-
 ```
 ##### 剑指 Offer II 071. 按权重生成随机数 * 前缀和 + 二分
 给定一个正整数数组 w ，其中 w[i] 代表下标 i 的权重（下标从 0 开始），请写一个函数 pickIndex ，它可以随机地获取下标 i，选取下标 i 的概率与 w[i] 成正比。
@@ -2637,6 +2634,13 @@ public:
     }
 };
 ```
+#### 剑指 Offer II 074. 合并区间 *思路巧妙双指针
+以数组 intervals 表示若干个区间的集合，其中单个区间为 intervals[i] = [starti, endi] 。请你合并所有重叠的区间，并返回一个不重叠的区间数组，该数组需恰好覆盖输入中的所有区间。
+示例 1：
+
+输入：intervals = [[1,3],[2,6],[8,10],[15,18]]
+输出：[[1,6],[8,10],[15,18]]
+解释：区间 [1,3] 和 [2,6] 重叠, 将它们合并为 [1,6].
 
 ```c++
     vector<vector<int>> merge(vector<vector<int>>& intervals) {
@@ -2654,9 +2658,81 @@ public:
         }
         return ans;
     }
+```
+```c++
+class Solution {
+public:
+    vector<vector<int>> merge(vector<vector<int>>& intervals) {
+        sort(intervals.begin(), intervals.end());
+        vector<vector<int>> ans;
+        for(int i = 0; i < intervals.size();) {
+            int tmp = intervals[i][1];
+            int j = i + 1;
+            while(j < intervals.size() && intervals[j][0] <= tmp) {
+                tmp = max(tmp, intervals[j][1]);
+                j++;
+            }
+            ans.push_back({intervals[i][0], tmp});
+            i = j;
+        }
+        return ans;
+    }
+};
+```
+#### 剑指 Offer II 076. 数组中的第 k 大的数字
+给定整数数组 nums 和整数 k，请返回数组中第 k 个最大的元素。
+请注意，你需要找的是数组排序后的第 k 个最大的元素，而不是第 k 个不同的元素。
 
+示例 1:
+输入: [3,2,1,5,6,4] 和 k = 2
+输出: 5
+```c++
+class Solution {
+    int random_partion(vector<int>& nums, int l, int r) {
+        int index = rand() % (r - l + 1) + l;
+        swap(nums[r], nums[index]);
+        int pivot = nums[r];
+        while(l < r) {
+            while(l < r && nums[l] < pivot) l++;
+            nums[r] = nums[l];
+            while(l < r && nums[r] >= pivot) r--;
+            nums[l] = nums[r];
+        }
+        nums[l] = pivot;
+        return l;
+    }
+
+public:
+    int findKthLargest(vector<int>& nums, int k) {
+        int l = 0, r = nums.size() - 1;
+        k = nums.size() - k;
+        while(1) {
+            int index = random_partion(nums, l, r);
+            if(index == k) return nums[k];
+            else if(index < k) l = index + 1;
+            else r = index - 1;
+        }
+    }
+};
+```
+#### 剑指 Offer II 077. 链表排序
+给定链表的头结点 head ，请将其按 升序 排列并返回 排序后的链表 。
+示例 1：
+
+输入：head = [4,2,1,3]
+输出：[1,2,3,4]
+示例 2：
+
+输入：head = [-1,5,3,4,0]
+输出：[-1,0,3,4,5]
+提示：
+链表中节点的数目在范围 [0, 5 * 104] 内
+-105 <= Node.val <= 105
+进阶：你可以在 O(n log n) 时间复杂度和常数级空间复杂度下，对链表进行排序吗？
+```c++
 
 ```
+
 29. 两数相除
     给定两个整数，被除数 dividend 和除数 divisor。将两数相除，要求不使用乘法、除法和 mod 运算符。
 
@@ -2668,27 +2744,9 @@ public:
 给你一个字符串 s ，请你去除字符串中重复的字母，使得每个字母只出现一次。需保证 返回结果的字典序最小（要求不能打乱其他字符的相对位置）。
 
 
-
 示例 1：
 
 输入：s = "bcabc"
-
-
-#### 剑指 Offer II 076. 数组中的第 k 大的数字
-给定整数数组 nums 和整数 k，请返回数组中第 k 个最大的元素。
-请注意，你需要找的是数组排序后的第 k 个最大的元素，而不是第 k 个不同的元素。
-
-示例 1:
-输入: [3,2,1,5,6,4] 和 k = 2
-输出: 5
-```c++
-class Solution {
-public:
-    int findKthLargest(vector<int>& nums, int k) {
-        
-    }
-};
-```
 #### 862. 和至少为 K 的最短子数组
 给你一个整数数组 nums 和一个整数 k ，找出 nums 中和至少为 k 的 最短非空子数组 ，并返回该子数组的长度。如果不存在这样的 子数组 ，返回 -1 。
 
