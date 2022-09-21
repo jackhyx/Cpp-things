@@ -2634,6 +2634,53 @@ public:
     }
 };
 ```
+```c++
+class Solution {
+public:
+    Solution(vector<int>& w) {
+        
+    }
+    
+    int pickIndex() {
+     
+};
+```
+#### 剑指 Offer II 073. 狒狒吃香蕉
+狒狒喜欢吃香蕉。这里有 n 堆香蕉，第 i 堆中有 piles[i] 根香蕉。警卫已经离开了，将在 h 小时后回来。
+狒狒可以决定她吃香蕉的速度 k （单位：根/小时）。每个小时，她将会选择一堆香蕉，从中吃掉 k 根。如果这堆香蕉少于 k 根，她将吃掉这堆的所有香蕉，然后这一小时内不会再吃更多的香蕉，下一个小时才会开始吃另一堆的香蕉。
+狒狒喜欢慢慢吃，但仍然想在警卫回来前吃掉所有的香蕉。
+返回她可以在 h 小时内吃掉所有香蕉的最小速度 k（k 为整数）。
+```c++
+class Solution {
+    int f (vector<int>& piles, int x) {
+        int hours = 0;
+        for (int i = 0; i < piles.size(); i++) {
+            hours += (piles[i] + x - 1) / x;
+        }
+        return hours;
+    }
+public:
+    int minEatingSpeed(vector<int>& piles, int h) {
+        int maxValue = 0;
+        for(auto& pile : piles) {
+            maxValue = max(pile, maxValue);
+        }
+        int l = 1;
+        int r = maxValue ;
+        int res = maxValue;
+        while(l < r) {
+            int mid = l + (r - l) / 2;
+            if (f(piles, mid) <= h) {
+                r = mid;
+                res = mid;
+            } else {
+                l = mid + 1;
+            }
+        }
+        return res;
+    }
+};
+```
 #### 剑指 Offer II 074. 合并区间 *思路巧妙双指针
 以数组 intervals 表示若干个区间的集合，其中单个区间为 intervals[i] = [starti, endi] 。请你合并所有重叠的区间，并返回一个不重叠的区间数组，该数组需恰好覆盖输入中的所有区间。
 示例 1：
@@ -2730,9 +2777,319 @@ public:
 -105 <= Node.val <= 105
 进阶：你可以在 O(n log n) 时间复杂度和常数级空间复杂度下，对链表进行排序吗？
 ```c++
+class Solution {
+public:
+       ListNode* sortList(ListNode* head) {
+        if(!head || !head->next) return head;
+        ListNode* fast = head;
+        ListNode* slow = head;
+        while(fast->next && fast->next->next) {
+            slow = slow->next;
+            fast = fast->next->next;
+        }
+        ListNode* tmp = slow->next;
+        slow->next = nullptr;
+        ListNode* left = sortList(head);
+        ListNode* right = sortList(tmp);
+        return merge(left, right);
+}  
+    ListNode* merge(ListNode* list1, ListNode* list2) {
+        ListNode* l1 = list1;
+        ListNode* l2 = list2;
+        ListNode *dummy = new ListNode(0);
+        ListNode *cur = dummy;
+        while(l1 && l2) {
+            if(l1->val > l2->val) {
+                cur->next = l2;
+                l2 = l2->next;
+            } else {
+                cur->next = l1;
+                l1 = l1->next;
+            }
+            cur = cur->next;
+        }
+        if(l1) cur->next = l1;
+        if(l2) cur->next = l2;
+        return dummy->next;
+    }
+};
+```
+#### 剑指 Offer II 078. 合并排序链表
+给定一个链表数组，每个链表都已经按升序排列。
+请将所有链表合并到一个升序链表中，返回合并后的链表。
+
+示例 1：
+
+输入：lists = [[1,4,5],[1,3,4],[2,6]]
+输出：[1,1,2,3,4,4,5,6]
+解释：链表数组如下：
+[
+1->4->5,
+1->3->4,
+2->6
+]
+将它们合并到一个有序链表中得到。
+1->1->2->3->4->4->5->6
+```c++
+class Solution {
+public:
+    ListNode* mergeKLists(vector<ListNode*>& lists) {
+
+    }
+};
 
 ```
+#### 剑指 Offer II 079. 所有子集
+给定一个整数数组 nums ，数组中的元素 互不相同 。返回该数组所有可能的子集（幂集）。
 
+解集 不能 包含重复的子集。你可以按 任意顺序 返回解集。
+
+
+示例 1：
+
+输入：nums = [1,2,3]
+输出：[[],[1],[2],[1,2],[3],[1,3],[2,3],[1,2,3]]
+示例 2：
+
+输入：nums = [0]
+输出：[[],[0]]
+
+
+提示：
+
+1 <= nums.length <= 10
+-10 <= nums[i] <= 10
+nums 中的所有元素 互不相同
+```c++
+class Solution {
+    vector<int> path;
+    vector<vector<int> result;
+    void backtracking(vector<int>& nums, int index) {
+        result.push_back(path);
+        for(int i = 0; i < nums.size(); i++) {
+            path.push_back(i);
+            backtracking(nums, i + 1);
+            path.pop_back();
+        }
+    }
+public:
+    vector<vector<int>> subsets(vector<int>& nums) {
+        path.clear();
+        result.clear();
+        backtracking(nums, 0);
+        return result;
+    }
+};
+```
+
+```c++
+class Solution {
+public:
+    vector<vector<int>> subsets(vector<int>& nums) {
+
+    }
+};
+```
+#### 剑指 Offer II 080. 含有 k 个元素的组合
+给定两个整数 n 和 k，返回 1 ... n 中所有可能的 k 个数的组合。
+
+示例 1:
+
+输入: n = 4, k = 2
+输出:
+[
+[2,4],
+[3,4],
+[2,3],
+[1,2],
+[1,3],
+[1,4],
+]
+示例 2:
+输入: n = 1, k = 1
+输出: [[1]]
+提示:
+1 <= n <= 20
+1 <= k <= n
+```c++
+class Solution {
+    vector<int> path;
+    vector<vector<int>> result;
+    void backtracking(int n, int k, int index) {
+        if(path.size() == k) {
+            result.push_back(path);
+            return ;
+        }
+        for(int i = index; i <= n; i++) {
+            path.push_back(i);
+            backtracking(n, k, i + 1);
+            path.pop_back();
+        }
+    }
+public:
+    vector<vector<int>> combine(int n, int k) {
+        result.clear();
+        path.clear();
+        backtracking(n, k, 1);
+        return result;
+    }
+};
+```
+#### 剑指 Offer II 083. 没有重复元素集合的全排列
+给定一个不含重复数字的整数数组 nums ，返回其 所有可能的全排列 。可以 按任意顺序 返回答案。
+```c++
+class Solution {
+    vector<int> path;
+    vector<vector<int>> result;
+    void backtracking(vector<int> &nums, vector<bool> &used) {
+        if(path.size() == nums.size()) {
+            result.push_back(path);
+        }
+        for(int i = 0; i < nums.size(); ++i) {
+            if(used[i] == true) continue;
+            used[i] = true;
+            path.push_back(nums[i]);
+            backtracking(nums, used);
+            path.pop_back();
+            used[i] = false;
+        }
+    }
+public:
+    vector<vector<int>> permute(vector<int>& nums) {
+        path.clear();
+        result.clear();
+        vector<bool> used(nums.size(), false);
+        backtracking(nums, used);
+        return result;
+    }
+};
+```
+#### 剑指 Offer II 084. 含有重复元素集合的全排列
+给定一个可包含重复数字的整数集合 nums ，按任意顺序 返回它所有不重复的全排列。
+示例 1：
+输入：nums = [1,1,2]
+输出：
+[[1,1,2],
+[1,2,1],
+[2,1,1]]
+示例 2：
+
+输入：nums = [1,2,3]
+输出：[[1,2,3],[1,3,2],[2,1,3],[2,3,1],[3,1,2],[3,2,1]
+```c++
+class Solution {
+public:
+    vector<vector<int>> permuteUnique(vector<int>& nums) {
+
+    }
+};
+```
+#### 剑指 Offer II 085. 生成匹配的括号
+正整数 n 代表生成括号的对数，请设计一个函数，用于能够生成所有可能的并且 有效的 括号组合。
+
+示例 1：
+
+输入：n = 3
+输出：["((()))","(()())","(())()","()(())","()()()"]
+```c++
+class Solution {
+public:
+    vector<string> generateParenthesis(int n) {
+
+    }
+};
+```
+#### 剑指 Offer II 086. 分割回文子字符串
+给定一个字符串 s ，请将 s 分割成一些子串，使每个子串都是 回文串 ，返回 s 所有可能的分割方案。
+
+回文串 是正着读和反着读都一样的字符串。
+```c++
+class Solution {
+public:
+    vector<vector<string>> partition(string s) {
+
+    }
+};
+```
+
+#### 剑指 Offer II 087. 复原 IP
+给定一个只包含数字的字符串 s ，用以表示一个 IP 地址，返回所有可能从 s 获得的 有效 IP 地址 。你可以按任何顺序返回答案。
+
+有效 IP 地址 正好由四个整数（每个整数位于 0 到 255 之间组成，且不能含有前导 0），整数之间用 '.' 分隔。
+
+例如："0.1.2.201" 和 "192.168.1.1" 是 有效 IP 地址，但是 "0.011.255.245"、"192.168.1.312" 和 "192.168@1.1" 是 无效 IP 地址。
+```c++
+class Solution {
+public:
+    vector<string> restoreIpAddresses(string s) {
+
+    }
+};
+```
+
+#### 剑指 Offer II 089. 房屋偷盗
+一个专业的小偷，计划偷窃沿街的房屋。每间房内都藏有一定的现金，影响小偷偷窃的唯一制约因素就是相邻的房屋装有相互连通的防盗系统，如果两间相邻的房屋在同一晚上被小偷闯入，系统会自动报警。
+
+给定一个代表每个房屋存放金额的非负整数数组 nums ，请计算 不触动警报装置的情况下 ，一夜之内能够偷窃到的最高金额。
+
+
+
+示例 1：
+
+输入：nums = [1,2,3,1]
+输出：4
+解释：偷窃 1 号房屋 (金额 = 1) ，然后偷窃 3 号房屋 (金额 = 3)。
+偷窃到的最高金额 = 1 + 3 = 4 。
+```c++
+class Solution {
+public:
+    int rob(vector<int>& nums) {
+
+    }
+};
+```
+#### 剑指 Offer II 089. 房屋偷盗
+一个专业的小偷，计划偷窃沿街的房屋。每间房内都藏有一定的现金，影响小偷偷窃的唯一制约因素就是相邻的房屋装有相互连通的防盗系统，如果两间相邻的房屋在同一晚上被小偷闯入，系统会自动报警。
+
+给定一个代表每个房屋存放金额的非负整数数组 nums ，请计算 不触动警报装置的情况下 ，一夜之内能够偷窃到的最高金额。
+```c++
+class Solution {
+public:
+    int rob(vector<int>& nums) {
+
+    }
+};
+```
+#### 剑指 Offer II 090. 环形房屋偷盗
+一个专业的小偷，计划偷窃一个环形街道上沿街的房屋，每间房内都藏有一定的现金。这个地方所有的房屋都 围成一圈 ，这意味着第一个房屋和最后一个房屋是紧挨着的。同时，相邻的房屋装有相互连通的防盗系统，如果两间相邻的房屋在同一晚上被小偷闯入，系统会自动报警 。
+
+给定一个代表每个房屋存放金额的非负整数数组 nums ，请计算 在不触动警报装置的情况下 ，今晚能够偷窃到的最高金额。
+```c++
+class Solution {
+public:
+    int rob(vector<int>& nums) {
+
+    }
+};
+```
+#### 剑指 Offer II 091. 粉刷房子
+假如有一排房子，共 n 个，每个房子可以被粉刷成红色、蓝色或者绿色这三种颜色中的一种，你需要粉刷所有的房子并且使其相邻的两个房子颜色不能相同。
+当然，因为市场上不同颜色油漆的价格不同，所以房子粉刷成不同颜色的花费成本也是不同的。每个房子粉刷成不同颜色的花费是以一个 n x 3 的正整数矩阵 costs 来表示的。
+例如，costs[0][0] 表示第 0 号房子粉刷成红色的成本花费；costs[1][2] 表示第 1 号房子粉刷成绿色的花费，以此类推。
+请计算出粉刷完所有房子最少的花费成本。
+示例 1：
+输入: costs = [[17,2,17],[16,16,5],[14,3,19]]
+输出: 10
+解释: 将 0 号房子粉刷成蓝色，1 号房子粉刷成绿色，2 号房子粉刷成蓝色。
+最少花费: 2 + 5 + 3 = 10。
+```c++
+class Solution {
+public:
+    int minCost(vector<vector<int>>& costs) {
+
+    }
+};
+```
 29. 两数相除
     给定两个整数，被除数 dividend 和除数 divisor。将两数相除，要求不使用乘法、除法和 mod 运算符。
 
