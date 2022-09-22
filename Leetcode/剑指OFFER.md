@@ -2935,6 +2935,68 @@ public:
     }
 };
 ```
+#### 剑指 Offer II 081. 允许重复选择元素的组合
+给定一个无重复元素的正整数数组 candidates 和一个正整数 target ，找出 candidates 中所有可以使数字和为目标数 target 的唯一组合。
+candidates 中的数字可以无限制重复被选取。如果至少一个所选数字数量不同，则两种组合是不同的。
+对于给定的输入，保证和为 target 的唯一组合数少于 150 个。
+
+```c++
+class Solution {
+    vector<int> path;
+    vector<vector<int>> result;
+    void backtracking(vector<int> &candidates, int sumTarget, int sum, int index) {
+        if(sum > sumTarget) return ;
+        if (sumTarget == sum) {
+            result.push_back(path);
+        };
+        for(int i = index; i < candidates.size(); i++) {
+            sum += candidates[i];
+            path.push_back(candidates[i]);
+            backtracking(candidates, sumTarget, sum, i);
+            path.pop_back();
+            sum -= candidates[i];
+        }
+    }
+public:
+    vector<vector<int>> combinationSum(vector<int>& candidates, int target) {
+        path.clear();
+        result.clear();
+        backtracking(candidates, target, 0, 0);
+        return result;
+    }
+};
+```
+#### 剑指 Offer II 082. 含有重复元素集合的组合
+给定一个可能有重复数字的整数数组 candidates 和一个目标数 target ，找出 candidates 中所有可以使数字和为 target 的组合。
+candidates 中的每个数字在每个组合中只能使用一次，解集不能包含重复的组合。
+```c++
+class Solution {
+    vector<int> path;
+    vector<vector<int>> result;
+    void backtracking(vector<int> &candidates, int sumTarget, int sum, int index) {
+        if(sum == sumTarget) {
+            result.push_back(path);
+        }
+        if(sum > sumTarget) return;
+        for(int i = index; i < candidates.size(); ++i) {
+            if(i > index && candidates[i] == candidates[i - 1]) continue;
+            sum += candidates[i];
+            path.push_back(candidates[i]);
+            backtracking(candidates, sumTarget, sum, i + 1);
+            path.pop_back();
+            sum -= candidates[i];
+        }
+    }
+public:
+    vector<vector<int>> combinationSum2(vector<int>& candidates, int target) {
+        path.clear();
+        result.clear();
+        sort(candidates.begin(), candidates.end());
+        backtracking(candidates, target, 0, 0);
+        return result;
+    }
+};
+```
 #### 剑指 Offer II 083. 没有重复元素集合的全排列
 给定一个不含重复数字的整数数组 nums ，返回其 所有可能的全排列 。可以 按任意顺序 返回答案。
 ```c++
@@ -3005,9 +3067,33 @@ public:
 回文串 是正着读和反着读都一样的字符串。
 ```c++
 class Solution {
+    vector<string> path;
+    vector<vector<string>> result;
+    void backtracking(string & s, int index) {
+         if(index >= s.size()) {
+             result.push_back(path);
+         }
+         for(int i = index; i < s.size(); ++i) {
+             if(ispalindrone(s, index, i)) {
+                 string str = s.substr(index, i - index + 1);
+                 path.push_back(str);
+             } else continue;
+             backtracking(s, i + 1);
+             path.pop_back();
+         }
+    }
+    bool ispalindrone(string &s, int start, int end) {
+        for(int i = start, j = end; i < j; i++, j--){
+            if(s[i] != s[j]) return false;
+        }
+        return true;
+    }
 public:
     vector<vector<string>> partition(string s) {
-
+        path.clear();
+        result.clear();
+        backtracking(s, 0);
+        return result;
     }
 };
 ```
@@ -3026,14 +3112,66 @@ public:
     }
 };
 ```
+#### 剑指 Offer II 088. 爬楼梯的最少成本
+数组的每个下标作为一个阶梯，第 i 个阶梯对应着一个非负数的体力花费值 cost[i]（下标从 0 开始）。
 
+每当爬上一个阶梯都要花费对应的体力值，一旦支付了相应的体力值，就可以选择向上爬一个阶梯或者爬两个阶梯。
+
+请找出达到楼层顶部的最低花费。在开始时，你可以选择从下标为 0 或 1 的元素作为初始阶梯。
+
+示例 1：
+
+输入：cost = [10, 15, 20]
+输出：15
+解释：最低花费是从 cost[1] 开始，然后走两步即可到阶梯顶，一共花费 15 。
+```c++
+class Solution {
+public:
+    int minCostClimbingStairs(vector<int>& cost) {
+        vector<int> dp(cost.size() + 1);
+        dp[0] = 0;
+        dp[1] = 0;
+        for(int i = 2; i <= cost.size(); ++i) {
+            dp[i] = min(dp[i - 1] + cost[i - 1], dp[i - 2] + cost[i -2]);
+        }
+        return dp[cost.size()];
+    }
+};
+```
+```c++
+class Solution {
+public:
+    int minCostClimbingStairs(vector<int>& cost) {
+        int dp1 = cost[0];
+        int dp2 = cost[1];
+        for(int i = 2; i < cost.size(); i++) {
+            int dpi = min(dp1, dp2) + cost[i];
+            dp1 = dp2;
+            dp2 = dpi;
+        }
+        return min(dp1, dp2);
+    }
+};
+```
 #### 剑指 Offer II 089. 房屋偷盗
 一个专业的小偷，计划偷窃沿街的房屋。每间房内都藏有一定的现金，影响小偷偷窃的唯一制约因素就是相邻的房屋装有相互连通的防盗系统，如果两间相邻的房屋在同一晚上被小偷闯入，系统会自动报警。
-
 给定一个代表每个房屋存放金额的非负整数数组 nums ，请计算 不触动警报装置的情况下 ，一夜之内能够偷窃到的最高金额。
-
-
-
+```c++
+class Solution {
+public:
+    int rob(vector<int>& nums) {
+        if(nums.size() == 1)return nums[0];
+        if(nums.size() == 0) return 0;
+        vector<int> dp(nums.size());
+        dp[0] = nums[0];
+        dp[1] = max(nums[0], nums[1]);
+        for(int i = 2; i <nums.size(); ++i) {
+            dp[i] = max(dp[i - 1], dp[i - 2] + nums[i]);
+        } 
+        return dp[nums.size() - 1];
+    }
+};
+```
 示例 1：
 
 输入：nums = [1,2,3,1]
@@ -3048,18 +3186,7 @@ public:
     }
 };
 ```
-#### 剑指 Offer II 089. 房屋偷盗
-一个专业的小偷，计划偷窃沿街的房屋。每间房内都藏有一定的现金，影响小偷偷窃的唯一制约因素就是相邻的房屋装有相互连通的防盗系统，如果两间相邻的房屋在同一晚上被小偷闯入，系统会自动报警。
 
-给定一个代表每个房屋存放金额的非负整数数组 nums ，请计算 不触动警报装置的情况下 ，一夜之内能够偷窃到的最高金额。
-```c++
-class Solution {
-public:
-    int rob(vector<int>& nums) {
-
-    }
-};
-```
 #### 剑指 Offer II 090. 环形房屋偷盗
 一个专业的小偷，计划偷窃一个环形街道上沿街的房屋，每间房内都藏有一定的现金。这个地方所有的房屋都 围成一圈 ，这意味着第一个房屋和最后一个房屋是紧挨着的。同时，相邻的房屋装有相互连通的防盗系统，如果两间相邻的房屋在同一晚上被小偷闯入，系统会自动报警 。
 
@@ -3068,9 +3195,35 @@ public:
 class Solution {
 public:
     int rob(vector<int>& nums) {
-
+        if(nums.size() == 0) return 0;
+        if(nums.size() == 1) return nums[0];
+        int result1 = robRange(nums, 0, nums.size() - 2);
+        int result2 = robRange(nums, 1, nums.size() - 1);
+        return max(result1, result2);
+    }
+    int robRange(vector<int> &nums, int start, int end) {
+        if(end == start)  return nums[start];
+        vector<int> dp(nums.size());
+        dp[start] = nums[start];
+        dp[start + 1] = max(nums[start], nums[start + 1]);
+        for(int i = start + 2; i <= end; i++) {
+            dp[i] = max(dp[i - 1], dp[i - 2] + nums[i]);
+        }
+        return dp[end];
     }
 };
+int robRange(vector<int> &nums, int start, int end) {
+        if(end == start)  return nums[start];
+        
+        first  = nums[start];
+        second = max(nums[start], nums[start + 1]);
+        for(int i = start + 2; i <= end; i++) {
+            temp = second;
+            second = max(first + nums[i], second);
+            first = temp;
+        }
+        return second;
+    }
 ```
 #### 剑指 Offer II 091. 粉刷房子
 假如有一排房子，共 n 个，每个房子可以被粉刷成红色、蓝色或者绿色这三种颜色中的一种，你需要粉刷所有的房子并且使其相邻的两个房子颜色不能相同。
@@ -3086,10 +3239,221 @@ public:
 class Solution {
 public:
     int minCost(vector<vector<int>>& costs) {
+        int dp[costs.size()][3];
+        dp[0][0] = costs[0][0];
+        dp[0][1] = costs[0][1];
+        dp[0][2] = costs[0][2];
+        for(int i = 1; i < n; i++) {
+            dp[i][0] = min(dp[i - 1][1], dp[i - 1][2]) + costs[i][0];
+            dp[i][1] = min(dp[i - 1][0], dp[i - 1][2]) + costs[i][1];
+            dp[i][2] = min(dp[i - 1][0], dp[i - 1][1]) + costs[i][2];
+        }
+        int res = INT_MAX;
+        for (int j = 0; j < 3; j++) {
+            res = min(res, dp[costs.size() - 1][j]);
+        }
+        return res;
+    }
+};
+```
+```c++
+class Solution {
+public:
+    int minCost(vector<vector<int>>& costs) {
+         vector<vector<int>> dp(2, vector<int>(3, 0));
+         dp[0][0] = costs[0][0];
+         dp[0][1] = costs[0][1];
+         dp[0][2] = costs[0][2];
+        for(int i = 1; i < costs.size(); i++) {
+            dp[1][0] = min(dp[0][1], dp[0][2]) + costs[i][0];
+            dp[1][1] = min(dp[0][0], dp[0][2]) + costs[i][1];
+            dp[1][2] = min(dp[0][0], dp[0][1]) + costs[i][2];
+            dp[0][0] = dp[1][0];
+            dp[0][1] = dp[1][1];
+            dp[0][2] = dp[1][2];
+        }
+        return min(min(dp[0][0], dp[0][1]), dp[0][2]);
+    }
+};
+```
+#### 剑指 Offer II 092. 翻转字符
+如果一个由 '0' 和 '1' 组成的字符串，是以一些 '0'（可能没有 '0'）后面跟着一些 '1'（也可能没有 '1'）的形式组成的，那么该字符串是 单调递增 的。
+我们给出一个由字符 '0' 和 '1' 组成的字符串 s，我们可以将任何 '0' 翻转为 '1' 或者将 '1' 翻转为 '0'。
+返回使 s 单调递增 的最小翻转次数。
+示例 1：
+输入：s = "00110"
+输出：1
+解释：我们翻转最后一位得到 00111.
+```c++
+class Solution {
+public:
+    int minFlipsMonoIncr(string s) {
+        int n = s.size();
+        vector<int> preSum(n+1);
+        for(int i = 0; i < n; ++i)
+            preSum[i+1] = preSum[i] + (s[i] - '0');
+        
+        int ans = INT_MAX;
+        for(int i = 0; i <= n; ++i)
+            ans = min(ans, preSum[i] + (n-i - (preSum[n] - preSum[i])));
+            //             ^^^^^^^^       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+            //             当前字符前面1的数量    当前字符包括当前字符后面0的数量
+        return ans;
+    }
+};
+
+```
+```c++
+class Solution {
+public:
+    int minFlipsMonoIncr(string& s) {
+    	int ret = 0, num_1 = 0;  
+    	for(char& c : s){
+    		if(c == '0')ret = min(ret + 1, num_1);
+            else num_1++;
+		}
+		return ret;
+    }
+};
+class Solution {
+public:
+    int minFlipsMonoIncr(string s) {
+        int dp = 0;
+        if(s.size() == 1) return dp;
+        int count = 0;
+        if(s[0] == '1') count = 1;
+        for(int i = 1; i < s.size(); i++) {
+            if(s[i] == '1') count++;
+            else dp = min(dp + 1, count);
+        }
+        return dp;
+    }
+};
+
+
+```
+```c++
+class Solution {
+public:
+    // dp[i][0] 当前位为0 , dp[i][1] 当前位为1 值：需要改变的最少字符个数
+    int dp[100010][2];
+    int minFlipsMonoIncr(string s) {
+        int n = s.size();
+        dp[0][0] = dp[0][1] = 0;
+        for (int i = 1; i <= n; ++i) {
+            int curr = s[i - 1] - '0';
+            // 当前位为0，则前一位只能为0
+            dp[i][0] = dp[i - 1][0] + (curr == 0 ? 0 : 1);
+            // 当前位为1，则前一位可以为0或1
+            dp[i][1] = std::min(dp[i - 1][0], dp[i - 1][1]) + (curr == 1 ? 0 : 1);
+        }
+            return std::min(dp[n][0] dp[n][1]);
+    }
+};
+```
+```c++
+class Solution {
+public:
+    int minFlipsMonoIncr(string s) {
+        int n = s.size();
+        int dp_0, dp_1;
+        dp_0 = dp_1 = 0;
+        for (int i = 1; i <= n; i++) {
+            char c = s[i - 1];
+            // 记录以前的dp_0
+            int tmp_dp_0 = dp_0;
+            // 三元运算符：前一位为1，这一位为0。翻转一次
+            dp_0 = dp_0 + (c == '1' ? 1 : 0);
+            // 三元运算符：前一位为1，这一位为1。可以不用翻转
+            dp_1 = min(tmp_dp_0, dp_1) + (c == '1' ? 0 : 1);
+        }
+        return min(dp_0, dp_1);
+    }
+};
+class Solution {
+public:
+    int minFlipsMonoIncr(string s)
+    {
+        int dp_0 = 0;//代表将当前字符能够合法转化为0所需的最小花费
+        int dp_1 = 0;//代表将当前字符能够合法转化为1所需的最小花费
+        for (int i = 0; i < s.size(); i++) {
+            if (s[i] == '0') {
+                dp_1 = min(dp_0, dp_1) + 1;
+                // dp_0 = dp_0;
+            } else {
+                dp_1 = min(dp_0, dp_1);
+                dp_0 = dp_0 + 1;
+            }
+        }
+        return min(dp_0, dp_1);
+    }
+};
+```
+```c++
+class Solution {
+public:
+    int minFlipsMonoIncr(string s) {
 
     }
 };
 ```
+#### 剑指 Offer II 093. 最长斐波那契数列
+如果序列 X_1, X_2, ..., X_n 满足下列条件，就说它是 斐波那契式 的：
+n >= 3
+对于所有 i + 2 <= n，都有 X_i + X_{i+1} = X_{i+2}
+给定一个严格递增的正整数数组形成序列 arr ，找到 arr 中最长的斐波那契式的子序列的长度。如果一个不存在，返回  0 。
+
+（回想一下，子序列是从原序列  arr 中派生出来的，它从 arr 中删掉任意数量的元素（也可以不删），而不改变其余元素的顺序。例如， [3, 5, 8] 是 [3, 4, 5, 6, 7, 8] 的一个子序列）
+
+示例 1：
+
+输入: arr = [1,2,3,4,5,6,7,8]
+输出: 5
+解释: 最长的斐波那契式子序列为 [1,2,3,5,8] 。
+```c++
+class Solution {
+public:
+    int lenLongestFibSubseq(vector<int>& arr) {
+
+    }
+};
+```
+#### 剑指 Offer II 094. 最少回文分割
+给定一个字符串 s，请将 s 分割成一些子串，使每个子串都是回文串。
+要求的 最少分割次数 。
+示例 1：
+
+输入：s = "aab"
+输出：1
+解释：只需一次分割就可将 s 分割成 ["aa","b"] 这样两个回文子串。
+```c++
+class Solution {
+public:
+    int minCut(string s) {
+
+    }
+};
+```
+#### 剑指 Offer II 095. 最长公共子序列
+给定两个字符串 text1 和 text2，返回这两个字符串的最长 公共子序列 的长度。如果不存在 公共子序列 ，返回 0 。
+一个字符串的 子序列 是指这样一个新的字符串：它是由原字符串在不改变字符的相对顺序的情况下删除某些字符（也可以不删除任何字符）后组成的新字符串。
+例如，"ace" 是 "abcde" 的子序列，但 "aec" 不是 "abcde" 的子序列。
+两个字符串的 公共子序列 是这两个字符串所共同拥有的子序列。
+
+示例 1：
+
+输入：text1 = "abcde", text2 = "ace"
+输出：3  
+解释：最长公共子序列是 "ace" ，它的长度为 3 。
+```c++
+class Solution {
+public:
+    int longestCommonSubsequence(string text1, string text2) {
+
+    }
+};
+```
+
 29. 两数相除
     给定两个整数，被除数 dividend 和除数 divisor。将两数相除，要求不使用乘法、除法和 mod 运算符。
 
