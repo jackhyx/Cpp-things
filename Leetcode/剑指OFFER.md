@@ -3393,11 +3393,18 @@ public:
 class Solution {
 public:
     int minFlipsMonoIncr(string s) {
-
+        int dp0 = 0;
+        int dp1 = 0;
+        for(int i = 0; i < s.size(); i++) {
+            int tmp_dp0 = dp0;
+            dp0 = dp0 + (s[i - 1] == '0' ? 0 : 1);
+            dp1 = min(tmp_dp0, dp1) + (s[i - 1] == '1' ? 0 : 1);
+        }
+        return min(dp0, dp1);
     }
 };
 ```
-#### 剑指 Offer II 093. 最长斐波那契数列
+#### 剑指 Offer II 093. 最长斐波那契数列** 
 如果序列 X_1, X_2, ..., X_n 满足下列条件，就说它是 斐波那契式 的：
 n >= 3
 对于所有 i + 2 <= n，都有 X_i + X_{i+1} = X_{i+2}
@@ -3414,7 +3421,96 @@ n >= 3
 class Solution {
 public:
     int lenLongestFibSubseq(vector<int>& arr) {
+        int n=arr.size(), ans=0;
+        // dp[i][j] 定义为 以 arr[i] arr[j] 作为最后两个数的 斐波那契数列的最大长度 减去 2
+        // 减不减去2都无所谓，就看你在哪一步处理
+        vector<vector<int>> dp(n,  vector<int> (n, 0));
+        unordered_map<int, int> h;
+        for(int i=0; i<n; ++i) h.insert({arr[i], i});
+        
+        for(int i=0; i<n; ++i) {
+            for(int j=i+1; j<n; ++j) {
+                int l = arr[j] - arr[i];
+                if(h.find(l)!=h.end() && h[l]<i) {
+                    dp[i][j] = dp[h[l]][i] + 1;
+                    ans = max(ans, dp[i][j]);
+                }
+            }
+        }
+        return (ans) ? ans+2 : 0;
+    }
+};
+```
+```c++
+class Solution {
+public:
+    int lenLongestFibSubseq(vector<int>& arr) {
+        unordered_map<int, int> indices;
+        int n = arr.size();
+        for (int i = 0; i < n; i++) {
+            indices[arr[i]] = i;
+        }
+        vector<vector<int>> dp(n, vector<int>(n));
+        int ans = 0;
+        for (int i = 0; i < n; i++) {
+            for (int j = i - 1; j >= 0 && arr[j] * 2 > arr[i]; j--) {
+                int k = -1;
+                if (indices.count(arr[i] - arr[j])) {
+                    k = indices[arr[i] - arr[j]];
+                }
+                if (k >= 0) {
+                    dp[j][i] = max(dp[k][j] + 1, 3);
+                }
+                ans = max(ans, dp[j][i]);
+            }
+        }
+        return ans;
+    }
+};
+class Solution {
+public:
+    int lenLongestFibSubseq(vector<int>& arr) {
+        unordered_map<int, int> mp;
+        int maxLen = 0;
+        int n = arr.size();
+        for(int i = 0; i < n; i ++) {
+            mp[arr[i]] = i;
+        }
+        vector<vector<int>> dp(n, vector<int>(n));
+        for(int i = 0; i < n; i ++) {
+            for(int j = i - 1; j >= 0 && arr[j] * 2 > arr[i]; j --) {
+                if(mp.count(arr[i] - arr[j])) {
+                    int index = mp[arr[i] - arr[j]];
+                    dp[j][i] = max(dp[index][j] + 1, 3);
+                }
+                maxLen = max(maxLen, dp[j][i]);
+            }
+        }
+        return maxLen >= 3 ? maxLen : 0;
+    }
+};
 
+```
+```c++
+class Solution {
+public:
+    int lenLongestFibSubseq(vector<int>& arr) {
+        unordered_map<int, int> umap;
+        int maxLen = 0;
+        for(int i = 0; i < arr.size(); ++i) {
+            umap[arr[i]] = i;
+        }
+        vector<vector<int>> dp(arr.size(), vecotr<int>(arr.size(), 0));
+        for(int i = 0; i < arr.size(); ++i) {
+            for(int j = i - 1; j >= 0 && arr[j] * 2 > arr[i]; j--) {
+                if(umap.count(arr[i] - arr[j])) {
+                    int index = umap[arr[i] - arr[j]];
+                    dp[j][i] = max(dp[index][j] + 1, 3);
+                }
+                maxLen = max(maxLen, dp[j][i]);
+            }
+        }
+        return maxLen >= 3? maxLen : 3;
     }
 };
 ```
@@ -3426,6 +3522,37 @@ public:
 输入：s = "aab"
 输出：1
 解释：只需一次分割就可将 s 分割成 ["aa","b"] 这样两个回文子串。
+```c++
+class Solution {
+public:
+    int minCut(string s) {
+        vector<vector<bool>> isPalindromic(s.size(), vector<bool>(s.size(), false));
+        for (int i = s.size() - 1; i >= 0; i--) {
+            for (int j = i; j < s.size(); j++) {
+                if (s[i] == s[j] && (j - i <= 1 || isPalindromic[i + 1][j - 1])) {
+                    isPalindromic[i][j] = true;
+                }
+            }
+        }
+        // 初始化
+        vector<int> dp(s.size(), 0);
+        for (int i = 0; i < s.size(); i++) dp[i] = i;
+
+        for (int i = 1; i < s.size(); i++) {
+            if (isPalindromic[0][i]) {
+                dp[i] = 0;
+                continue;
+            }
+            for (int j = 0; j < i; j++) {
+                if (isPalindromic[j + 1][i]) {
+                    dp[i] = min(dp[i], dp[j] + 1);
+                }
+            }
+        }
+        return dp[s.size() - 1];
+    }
+};
+```
 ```c++
 class Solution {
 public:
@@ -3449,11 +3576,159 @@ public:
 class Solution {
 public:
     int longestCommonSubsequence(string text1, string text2) {
+        vector<vector<int>> dp(text1.size() + 1, vector<int>(text2.size() + 1, 0));
+        for(int i = 1; i <= text1.size(); i++) {
+            for(int j = 1; j <= text2.size(); j++) {
+                if(text1[i - 1] == text2[j - 1]) {
+                    dp[i][j] = dp[i - 1][j - 1] + 1; 
+                } else {
+                    dp[i][j] = min(dp[i - 1][j], dp[i][j - 1]);
+                }
+            }
+        }
+        return dp[text1.size()][text2.size()];
+    }
+};
+```
+##### 剑指 Offer II 098. 路径的数目
+一个机器人位于一个 m x n 网格的左上角 （起始点在下图中标记为 “Start” ）。
+机器人每次只能向下或者向右移动一步。机器人试图达到网格的右下角（在下图中标记为 “Finish” ）。
+问总共有多少条不同的路径？
+
+```c++
+class Solution {
+public:
+    int uniquePaths(int m, int n) {
+        vector<vector<int>> dp(m, vector<int> (n, 0));
+        for(int i = 0; i < m; i++) dp[i][0] = 1;
+        for(int j = 0; j < n; j++) dp[0][j] = 1;
+        for(int i = 1; i < m; i++) {
+            for(int j = 1; j < n; j++) {
+                dp[i][j] = dp[i - 1][j] + dp[i][j - 1];
+            }
+        }
+        return dp[m - 1][n - 1];
+    }
+};
+```
+```c++
+
+```
+#### 剑指 Offer II 097. 子序列的数目
+给定一个字符串 s 和一个字符串 t ，计算在 s 的子序列中 t 出现的个数。
+字符串的一个 子序列 是指，通过删除一些（也可以不删除）字符且不干扰剩余字符相对位置所组成的新字符串。（例如，"ACE" 是 "ABCDE" 的一个子序列，而 "AEC" 不是）
+题目数据保证答案符合 32 位带符号整数范围。
+示例 1：
+
+输入：s = "rabbbit", t = "rabbit"
+输出：3
+解释：
+如下图所示, 有 3 种可以从 s 中得到 "rabbit" 的方案。
+rabbbit
+rabbbit
+rabbbit
+```c++
+class Solution {
+public:
+    int numDistinct(string s, string t) {
+        vector<vector<int>> dp(s.size() + 1, vector<int> (t.size() + 1);
+        for(int i = 0; i <= s.size(); i++) dp[i][0] = 1;
+        for(int j = 1; j <= t.size(); j++) dp[0][j] = 0;
+        for(int i = 1; i <= s.size(); i++) {
+            for(int j = 1; j <= t.size(); j++) {
+                if(s[i - 1] == s[j - 1]) {
+                    dp[i][j] = dp[i - 1][j] + dp[i - 1][j - 1];
+                } else {
+                    dp[i][j] = dp[i - 1][j];
+                }
+            }
+        }
+        return dp[s.size()][t.size()];
+    }
+};
+```
+#### 剑指 Offer II 099. 最小路径之和
+给定一个包含非负整数的 m x n 网格 grid ，请找出一条从左上角到右下角的路径，使得路径上的数字总和为最小。
+
+说明：一个机器人每次只能向下或者向右移动一步。
+```c++
+class Solution {
+public:
+    int minPathSum(vector<vector<int>>& grid) {
+        vector<vector<int>> dp(grid.size(), vector<int>(grid[0].size()));
+        dp[0][0] = grid[0][0];
+        for(int i = 1; i < grid.size(); i++) dp[i][0] = dp[i - 1][0] + grid[i][0];
+        for(int j = 1; j < grid[0].size(); j++) dp[0][j] = dp[0][j - 1] + grid[0][j];
+        for(int i = 1; i < grid.size(); i++) {
+            for(int j = 1; j < grid[0].size(); j++) {
+                dp[i][j] = min(dp[i - 1][j], dp[i][j - 1]) + grid[i][j];
+            }
+        }
+        return dp[grid.size() - 1][grid[0].size() - 1];
+    }
+};
+```
+```c++
+class Solution {
+public:
+    int minPathSum(vector<vector<int>>& grid) {
 
     }
 };
 ```
+#### 剑指 Offer II 100. 三角形中最小路径之和
+给定一个三角形 triangle ，找出自顶向下的最小路径和。
+每一步只能移动到下一行中相邻的结点上。相邻的结点 在这里指的是 下标 与 上一层结点下标 相同或者等于 上一层结点下标 + 1 的两个结点。也就是说，如果正位于当前行的下标 i ，那么下一步可以移动到下一行的下标 i 或 i + 1 。
+示例 1：
 
+输入：triangle = [[2],[3,4],[6,5,7],[4,1,8,3]]
+输出：11
+解释：如下面简图所示：
+2
+3 4
+6 5 7
+4 1 8 3
+自顶向下的最小路径和为 11（即，2 + 3 + 5 + 1 = 11）。
+```c++
+class Solution {
+public:
+    int minimumTotal(vector<vector<int>>& triangle) {
+
+    }
+};
+```
+```c++
+class Solution {
+public:
+    int minimumTotal(vector<vector<int>>& triangle) {
+        vector<vector<int> >dp(triangle.size(),vector<int>(triangle[0].size(),0));
+        for(int i = 0;i<triangle.size();i++){
+            dp[i].resize(triangle[i].size());
+        }
+        for(int i = 0;i<triangle.size();i++){
+            for(int j = 0;j<triangle[i].size();j++){
+                if(i==0&&j==0) dp[0][0]=triangle[0][0];
+                else if(j==0){
+                   dp[i][j]=dp[i-1][j]+triangle[i][j];
+                }
+                else if(j==triangle[i].size()-1){
+                    dp[i][j]=dp[i-1][j-1]+triangle[i][j];
+                }
+                else{
+                    dp[i][j]=min(dp[i-1][j],dp[i-1][j-1])+triangle[i][j];
+                }
+            }
+        }
+        int res = dp[triangle.size()-1][0];
+        for(int i = 0;i<dp[triangle.size()-1].size();i++){
+            if(dp[triangle.size()-1][i]<res){
+                res = dp[triangle.size()-1][i];
+            }
+        }
+        return res;
+    }
+};
+```
 29. 两数相除
     给定两个整数，被除数 dividend 和除数 divisor。将两数相除，要求不使用乘法、除法和 mod 运算符。
 
