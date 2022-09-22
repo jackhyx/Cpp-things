@@ -3495,22 +3495,22 @@ public:
 class Solution {
 public:
     int lenLongestFibSubseq(vector<int>& arr) {
+        vector<vector<int>> dp(arr.size(), vector<int>(arr.size(), 0));
         unordered_map<int, int> umap;
         int maxLen = 0;
-        for(int i = 0; i < arr.size(); ++i) {
+        for(int i = 0; i < arr.size(); i++) {
             umap[arr[i]] = i;
         }
-        vector<vector<int>> dp(arr.size(), vecotr<int>(arr.size(), 0));
-        for(int i = 0; i < arr.size(); ++i) {
+        for(int i = 0; i < arr.size(); i++) {
             for(int j = i - 1; j >= 0 && arr[j] * 2 > arr[i]; j--) {
                 if(umap.count(arr[i] - arr[j])) {
                     int index = umap[arr[i] - arr[j]];
                     dp[j][i] = max(dp[index][j] + 1, 3);
                 }
-                maxLen = max(maxLen, dp[j][i]);
+                maxLen = max(dp[j][i], maxLen);
             }
         }
-        return maxLen >= 3? maxLen : 3;
+        return maxLen >= 3? maxLen : 0;
     }
 };
 ```
