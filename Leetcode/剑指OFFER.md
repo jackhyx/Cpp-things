@@ -3728,6 +3728,25 @@ public:
         return res;
     }
 };
+    int minimumTotal(vector<vector<int>>& triangle) {
+        vector<vector<int>> dp(triangle.size(), vector<int>(triangle[0].size(), 0));
+        for(int i = 0; i < triangle.size(); i++) {
+            for(int j = 0; j < triangle[0].size(); j++) {
+                if(i == 0 && j == 0) dp[0][0] = triangle[0][0];
+                else if(j == 0) dp[i][j] = dp[i - 1][j] + triangle[i][j];
+                else if(j == triangle[i].size() - 1) {
+                    dp[i][j] = dp[i - 1][j - 1] + triangle[i][j];
+                } else {
+                    dp[i][j] = min(dp[i - 1][j], dp[i - 1][j - 1]) + triangle[i][j];
+                }
+            }
+        }
+        int res = dp[triangle.size() - 1][0];
+        for(int i = 0; i < dp[triangle.size() - 1].size(); i ++) {
+            if(dp[triangle.size() - 1][i] < res) res = dp[triangle.size() - 1][i];
+        }
+        return res;
+    }
 ```
 ```c++
 class Solution {
@@ -3744,6 +3763,51 @@ public:
             f[i][i] = f[i - 1][i - 1] + triangle[i][i];
         }
         return *min_element(f[n - 1].begin(), f[n - 1].end());
+    }
+};
+```
+#### 剑指 Offer II 102. 加减的目标值
+给定一个正整数数组 nums 和一个整数 target 。
+向数组中的每个整数前添加 '+' 或 '-' ，然后串联起所有整数，可以构造一个 表达式 ：
+例如，nums = [2, 1] ，可以在 2 之前添加 '+' ，在 1 之前添加 '-' ，然后串联起来得到表达式 "+2-1" 。
+返回可以通过上述方法构造的、运算结果等于 target 的不同 表达式 的数目。
+```c++
+class Solution {
+public:
+    int findTargetSumWays(vector<int>& nums, int target) {
+           int sum = 0;
+           for(auto &num : nums) {
+               sum += num;
+           } 
+           if(abs(target) > sum) return 0;
+           if((target + sum) % 2 == 1) return 0;
+           int bagSize = (target + sum) / 2;
+           if (bagSize < 0) return 0;
+           vector<int> dp(bagSize + 1, 0);
+           dp[0] = 1;
+           for(int i = 0; i < nums.size(); i++) {
+               for(int j = bagSize; j >= nums[i]; j--) {
+                   dp[j] += dp[j - nums[i]];
+               }
+           }  
+           return dp[bagSize];
+    }
+};
+```
+#### 剑指 Offer II 103. 最少的硬币数目
+给定不同面额的硬币 coins 和一个总金额 amount。编写一个函数来计算可以凑成总金额所需的最少的硬币个数。如果没有任何一种硬币组合能组成总金额，返回 -1。
+你可以认为每种硬币的数量是无限的。
+
+示例 1：
+
+输入：coins = [1, 2, 5], amount = 11
+输出：3
+解释：11 = 5 + 5 + 1
+```c++
+class Solution {
+public:
+    int coinChange(vector<int>& coins, int amount) {
+        
     }
 };
 ```
