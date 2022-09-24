@@ -1,6 +1,7 @@
 
 https://oi-wiki.org/string/match/
 https://github.com/xiaobaiTech/golangFamily
+https://imageslr.com/
 #### 由数据范围反推算法复杂度以及算法内容
 ![img.png](img.png)
 
@@ -3747,6 +3748,177 @@ public:
     }
 };
 ```
+#### 剑指 Offer II 102. 加减的目标值
+给定一个正整数数组 nums 和一个整数 target 。
+向数组中的每个整数前添加 '+' 或 '-' ，然后串联起所有整数，可以构造一个 表达式 ：
+例如，nums = [2, 1] ，可以在 2 之前添加 '+' ，在 1 之前添加 '-' ，然后串联起来得到表达式 "+2-1" 。
+返回可以通过上述方法构造的、运算结果等于 target 的不同 表达式 的数目。
+```c++
+class Solution {
+public:
+    int findTargetSumWays(vector<int>& nums, int target) {
+
+    }
+};
+```
+#### 剑指 Offer II 103. 最少的硬币数目 *
+给定不同面额的硬币 coins 和一个总金额 amount。编写一个函数来计算可以凑成总金额所需的最少的硬币个数。如果没有任何一种硬币组合能组成总金额，返回 -1。
+你可以认为每种硬币的数量是无限的。
+
+示例 1：
+
+输入：coins = [1, 2, 5], amount = 11
+输出：3
+解释：11 = 5 + 5 + 1
+```c++
+class Solution {
+public:
+    int coinChange(vector<int>& coins, int amount) {
+
+    }
+};
+```
+#### 剑指 Offer II 104. 排列的数目 *
+给定一个由 不同 正整数组成的数组 nums ，和一个目标整数 target 。请从 nums 中找出并返回总和为 target 的元素组合的个数。数组中的数字可以在一次排列中出现任意次，但是顺序不同的序列被视作不同的组合。
+题目数据保证答案符合 32 位整数范围。
+
+示例 1：
+
+输入：nums = [1,2,3], target = 4
+输出：7
+解释：
+所有可能的组合为：
+(1, 1, 1, 1)
+(1, 1, 2)
+(1, 2, 1)
+(1, 3)
+(2, 1, 1)
+(2, 2)
+(3, 1)
+请注意，顺序不同的序列被视作不同的组合。
+```c++
+class Solution {
+public:
+    int combinationSum4(vector<int>& nums, int target) {
+
+    }
+};
+```
+#### 剑指 Offer II 105. 岛屿的最大面积
+给定一个由 0 和 1 组成的非空二维数组 grid ，用来表示海洋岛屿地图。
+一个 岛屿 是由一些相邻的 1 (代表土地) 构成的组合，这里的「相邻」要求两个 1 必须在水平或者竖直方向上相邻。你可以假设 grid 的四个边缘都被 0（代表水）包围着。
+找到给定的二维数组中最大的岛屿面积。如果没有岛屿，则返回面积为 0
+```c++
+
+```
+#### 剑指 Offer II 106. 二分图
+存在一个 无向图 ，图中有 n 个节点。其中每个节点都有一个介于 0 到 n - 1 之间的唯一编号。
+给定一个二维数组 graph ，表示图，其中 graph[u] 是一个节点数组，由节点 u 的邻接节点组成。形式上，对于 graph[u] 中的每个 v ，都存在一条位于节点 u 和节点 v 之间的无向边。该无向图同时具有以下属性：
+
+不存在自环（graph[u] 不包含 u）。
+不存在平行边（graph[u] 不包含重复值）。
+如果 v 在 graph[u] 内，那么 u 也应该在 graph[v] 内（该图是无向图）
+这个图可能不是连通图，也就是说两个节点 u 和 v 之间可能不存在一条连通彼此的路径。
+二分图 定义：如果能将一个图的节点集合分割成两个独立的子集 A 和 B ，并使图中的每一条边的两个节点一个来自 A 集合，一个来自 B 集合，就将这个图称为 二分图 。
+
+如果图是二分图，返回 true ；否则，返回 false 。
+```c++
+
+```
+### 剑指 Offer II 107. 矩阵中的距离
+给定一个由 0 和 1 组成的矩阵 mat ，请输出一个大小相同的矩阵，其中每一个格子是 mat 中对应位置元素到最近的 0 的距离。
+
+两个相邻元素间的距离为 1 。
+```c++
+
+```
+#### 剑指 Offer II 108. 单词演变
+在字典（单词列表） wordList 中，从单词 beginWord 和 endWord 的 转换序列 是一个按下述规格形成的序列：
+
+序列中第一个单词是 beginWord 。
+序列中最后一个单词是 endWord 。
+每次转换只能改变一个字母。
+转换过程中的中间单词必须是字典 wordList 中的单词。
+给定两个长度相同但内容不同的单词 beginWord 和 endWord 和一个字典 wordList ，找到从 beginWord 到 endWord 的 最短转换序列 中的 单词数目 。如果不存在这样的转换序列，返回 0。
+```c++
+
+```
+### 剑指 Offer II 109. 开密码锁
+一个密码锁由 4 个环形拨轮组成，每个拨轮都有 10 个数字： '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' 。每个拨轮可以自由旋转：例如把 '9' 变为 '0'，'0' 变为 '9' 。每次旋转都只能旋转一个拨轮的一位数字。
+
+锁的初始数字为 '0000' ，一个代表四个拨轮的数字的字符串。
+
+列表 deadends 包含了一组死亡数字，一旦拨轮的数字和列表里的任何一个元素相同，这个锁将会被永久锁定，无法再被旋转。
+
+字符串 target 代表可以解锁的数字，请给出解锁需要的最小旋转次数，如果无论如何不能解锁，返回 -1 。
+```c++
+class Solution {
+public:
+    int openLock(vector<string>& deadends, string target) {
+        queue<pair<string, int>> que;
+        unordered_map<string, bool> umap;
+
+        for(auto & dend : deadends) {
+            umap[dend] = true;
+        }
+        string s = "0000";
+        if(umap[s]) return -1;
+        umap[s] = true;
+        que.emplace(s, 0);
+        while(!que.empty()) {
+            auto node = que.front();
+            que.pop();
+            if(node.first == target) return node.second;
+            for(int i = 0; i < 4; i++) {
+                auto temp = node.first;
+                auto num = node.second;
+                temp[i] = temp[i] == '9' ? '0' : temp[i] + 1;
+                if(!umap[temp]) {
+                    umap[temp] = true;
+                    que.emplace(temp, num + 1);
+                }
+                temp = node.first;
+                temp[i] = temp[i] == '0' ? '9' : temp[i] - 1;
+                if(!umap[temp]) {
+                    umap[temp] = true;
+                    que.emplace(temp, num + 1);
+                    
+                }
+            }
+        }
+        return -1;
+    }
+};
+```
+#### 剑指 Offer II 110. 所有路径
+给定一个有 n 个节点的有向无环图，用二维数组 graph 表示，请找到所有从 0 到 n-1 的路径并输出（不要求按顺序）。
+
+graph 的第 i 个数组中的单元都表示有向图中 i 号节点所能到达的下一些结点（译者注：有向图是有方向的，即规定了 a→b 你就不能从 b→a ），若为空，就是没有下一个节点了。
+
+```c++
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 29. 两数相除
     给定两个整数，被除数 dividend 和除数 divisor。将两数相除，要求不使用乘法、除法和 mod 运算符。
 
