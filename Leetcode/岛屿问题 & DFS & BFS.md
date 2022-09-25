@@ -62,6 +62,188 @@ public:
         return res;      
     }
 };
+class Solution {
+public:
+    int numIslands(vector<vector<char>>& grid) {
+        int M = grid.size();
+        int N = grid[0].size();
+        vector<vector<bool>>visited(M, vector<bool>(N, false)); // 标记数组
+        int ans = 0;
+        for(int i=0; i<M; i++){
+            for(int j=0; j<N; j++){
+                if(grid[i][j] == '1' && visited[i][j] == false){
+                    dfs(ans, grid, visited, i, j);
+                    ans++;
+                }
+                visited[i][j] = true;
+            }
+        }
+        return ans;
+    }
+
+    void dfs(int& ans, vector<vector<char>>& grid, vector<vector<bool>>& visited, int i, int j)
+    {
+        if(i<0 || i>=grid.size() || j<0 || j>=grid[0].size() || grid[i][j]=='0'||visited[i][j]==true){
+            return;
+        }
+        visited[i][j] = true;
+        dfs(ans, grid, visited, i-1, j); // 上
+        dfs(ans, grid, visited, i+1, j); // 下
+        dfs(ans, grid, visited, i, j-1); // 左
+        dfs(ans, grid, visited, i, j+1); // 右
+    }
+};
+
+
+```
+* BFS
+```c++
+class Solution {
+public:
+    int numIslands(vector<vector<char>>& grid) {
+        int M = grid.size();
+        int N = grid[0].size();
+        vector<vector<bool>>visited(M, vector<bool>(N, false));
+        int ans = 0;
+        for(int i=0; i<M; i++){
+            for(int j=0; j<N; j++){
+                if(grid[i][j] == '1' && visited[i][j] == false){
+                    bfs(ans, grid, visited, i, j);
+                    ans++;
+                }
+                visited[i][j] = true;
+            }
+        }
+        return ans;
+    }
+
+    void bfs(int& ans, vector<vector<char>>& grid, vector<vector<bool>>& visited, int i, int j){
+        queue<pair<int, int>>que;
+        que.push(make_pair(i, j));
+        while(!que.empty()){
+            i = que.front().first;
+            j = que.front().second;
+            que.pop();
+            visited[i][j] = true;
+            if(i+1 < grid.size() && grid[i+1][j]=='1' && visited[i+1][j] == false){
+                que.push(make_pair(i+1, j));
+                visited[i+1][j] = true;
+            }
+            if(j+1 < grid[0].size() && grid[i][j+1]=='1' && visited[i][j+1] == false){
+                que.push(make_pair(i, j+1));
+                visited[i][j+1] = true;
+            }
+            if(i-1 >=0 && grid[i-1][j]=='1' && visited[i-1][j] == false){
+                que.push(make_pair(i-1, j));
+                visited[i-1][j] = true;
+            }
+            if(j-1 >=0 && grid[i][j-1]=='1' && visited[i][j-1] == false){
+                que.push(make_pair(i, j-1));
+                visited[i][j-1] = true;
+            }
+
+        }
+    }
+};
+
+
+class Solution {
+public:
+    int numIslands(vector<vector<char>>& grid) {
+        int nr = grid.size();
+        if (!nr) return 0;
+        int nc = grid[0].size();
+
+        int num_islands = 0;
+        for (int r = 0; r < nr; ++r) {
+            for (int c = 0; c < nc; ++c) {
+                if (grid[r][c] == '1') {
+                    ++num_islands;
+                    grid[r][c] = '0';
+                    queue<pair<int, int>> neighbors;
+                    neighbors.push({r, c});
+                    while (!neighbors.empty()) {
+                        auto rc = neighbors.front();
+                        neighbors.pop();
+                        int row = rc.first, col = rc.second;
+                        if (row - 1 >= 0 && grid[row-1][col] == '1') {
+                            neighbors.push({row-1, col});
+                            grid[row-1][col] = '0';
+                        }
+                        if (row + 1 < nr && grid[row+1][col] == '1') {
+                            neighbors.push({row+1, col});
+                            grid[row+1][col] = '0';
+                        }
+                        if (col - 1 >= 0 && grid[row][col-1] == '1') {
+                            neighbors.push({row, col-1});
+                            grid[row][col-1] = '0';
+                        }
+                        if (col + 1 < nc && grid[row][col+1] == '1') {
+                            neighbors.push({row, col+1});
+                            grid[row][col+1] = '0';
+                        }
+                    }
+                }
+            }
+        }
+
+        return num_islands;
+    }
+};
+class Solution {
+private:
+    const int cul[4][2]={{0,1},{0,-1},{-1,0},{1,0}};//用于计算当前陆地的上下左右坐标
+
+public:
+    int numIslands(vector<vector<char>>& grid) {
+        int ans=0;  //记录岛屿数量        
+        vector<vector<int>> vis(grid.size(),vector<int>(grid[0].size(),0)); //vis值记录遍历过的坐标
+        queue<pair<int,int>> search;
+
+        
+        for(int i=0;i<grid.size();i++){        //全部遍历一遍
+            for(int j=0;j<grid[0].size();j++){
+
+                
+                if(grid[i][j]=='1'&&vis[i][j]==0){          //符合条件的进行bfs
+                    vis[i][j]=1;    //遍历过置vis值为1
+                    search.push({i,j});
+
+                              
+                    /*********************关键代码***********************/    
+                    /*广度优先搜索，用于标记陆地*/            
+                    while(!search.empty()){
+                        pair<int,int> loc=search.front();//拿出队列第一个坐标值
+                        search.pop();
+                        for(int m=0;m<4;m++){   //计算当前岛屿的上下左右坐标
+                            if(loc.first+cul[m][0]<grid.size()&&loc.first+cul[m][0]>=0&&loc.second+cul[m][1]<grid[0].size()&&loc.second+cul[m][1]>=0){//判断边界
+                            
+                            //判断陆地是否遍历过，若遍历过说明已经标记不用再遍历一次
+                            if(grid[loc.first+cul[m][0]][loc.second+cul[m][1]]=='1'&&vis[loc.first+cul[m][0]][loc.second+cul[m][1]]==0){
+                                //符合条件将坐标位置推入队列，在下一轮对该位置的上下左右坐标是否有陆地进行判断
+                                search.push({loc.first+cul[m][0],loc.second+cul[m][1]});
+                                vis[loc.first+cul[m][0]][loc.second+cul[m][1]]=1;   //将遍历过的陆地的vis值置1
+                            }
+
+                            }
+                        }
+                    }
+                    /************************************************/
+
+
+                    ans++;  //一个岛屿遍历过的陆地vis值全部置1后，该岛屿被标记，最外层遍历不会再遍历到，ans++
+                }
+
+
+                vis[i][j]=1;    //非岛屿遍历过置vis值为1
+            
+            }
+        }
+        return ans;
+    }
+};
+
+
 ```
 ```c++
 class Solution {
