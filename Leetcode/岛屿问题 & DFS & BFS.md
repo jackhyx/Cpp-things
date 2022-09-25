@@ -1,3 +1,21 @@
+
+
+
+
+![img_1.png](img_1.png)
+
+
+
+
+
+
+
+
+
+
+
+
+
 #### 200. 岛屿数量
 给你一个由 '1'（陆地）和 '0'（水）组成的的二维网格，请你计算网格中岛屿的数量。
 岛屿总是被水包围，并且每座岛屿只能由水平方向和/或竖直方向上相邻的陆地连接形成。
@@ -735,6 +753,556 @@ public:
             }
         }
         return -1; // 无法变为目标数字，直接返回-1
+    }
+};
+```
+#### 399. 除法求值
+给你一个变量对数组 equations 和一个实数值数组 values 作为已知条件，其中 equations[i] = [Ai, Bi] 和 values[i] 共同表示等式 Ai / Bi = values[i] 。每个 Ai 或 Bi 是一个表示单个变量的字符串。
+另有一些以数组 queries 表示的问题，其中 queries[j] = [Cj, Dj] 表示第 j 个问题，请你根据已知条件找出 Cj / Dj = ? 的结果作为答案。
+返回 所有问题的答案 。如果存在某个无法确定的答案，则用 -1.0 替代这个答案。如果问题中出现了给定的已知条件中没有出现的字符串，也需要用 -1.0 替代这个答案。
+注意：输入总是有效的。你可以假设除法运算中不会出现除数为 0 的情况，且不存在任何矛盾的结果。
+
+示例 1：
+
+输入：equations = [["a","b"],["b","c"]], values = [2.0,3.0], queries = [["a","c"],["b","a"],["a","e"],["a","a"],["x","x"]]
+输出：[6.00000,0.50000,-1.00000,1.00000,-1.00000]
+解释：
+条件：a / b = 2.0, b / c = 3.0
+问题：a / c = ?, b / a = ?, a / e = ?, a / a = ?, x / x = ?
+结果：[6.0, 0.5, -1.0, 1.0, -1.0 ]
+```c++
+class Solution {
+public:
+    double dfs(unordered_map<string, unordered_map<string, double>>& hash, string from,
+                string to, unordered_set<string>& visited)
+    {
+        if (from == to)
+        {
+            return 1.0;
+        }
+
+        visited.insert(from);
+        for (auto &path : hash[from])       //遍历哈希表，注意此处 path 是一个 pair 形式的 HashMap
+        {
+            string toStr = path.first;      // to 代表的字符串
+            double curVal = path.second;    //从 from 到 to 的值
+
+            if (visited.find(toStr) == visited.end())
+            {
+                double nextVal = dfs(hash, toStr, to, visited);
+                if (nextVal > 0)
+                {
+                    return curVal * nextVal;
+                }
+            }
+        }
+
+        visited.erase(from);
+        return -1.0;                        //返回负数表示无可达路径
+    }
+
+    vector<double> calcEquation(vector<vector<string>>& equations, vector<double>& values,
+                                vector<vector<string>>& queries) {
+        unordered_map<string, unordered_map<string, double>> hash;
+
+        for (int i = 0; i < equations.size(); ++ i)                     //建图
+        {
+            hash[equations[i][0]][equations[i][1]] = values[i];         //从 from 到 to
+            hash[equations[i][1]][equations[i][0]] = 1.0 / values[i];   //从 to 到 from
+        }
+
+        vector<double> res;
+
+        for (int i = 0; i < queries.size(); ++ i)
+        {
+            string from = queries[i][0];
+            string to = queries[i][1];
+
+            if (hash.find(from) == hash.end() || hash.find(to) == hash.end())
+            {
+                res.push_back(-1);              //找不到终点或起点的情况，即不可达
+            }
+            else
+            {
+                unordered_set<string> visited;  //用一个哈希表记录走过的点
+                res.push_back(dfs(hash, from, to ,visited));
+            }
+        }
+        return res;
+    }
+};
+class Solution {
+public:
+    //2020.12.7 日
+
+    //全局变量2个
+    vector<double> res;
+    bool Nofand;
+
+    void dfs(unordered_map< string , vector<pair<string,double>> >& g, unordered_map<string,int>& visit,string val, const string& target, const double& path){
+        //如果节点已经相连接，那没 必要再dfs搜索了，直接返回
+        if( Nofand == false )
+            return;
+        
+        if( val == target){
+            Nofand = false;
+            res.push_back(path);
+            return;
+        }
+
+        for(int j = 0;j<g[val].size(); ++j){
+            //检查与val相连接的点，是否已经访问过了。没访问过继续dfs
+            if(visit[ g[val][j].first ] == 0 ){
+                visit[ g[val][j].first ] = 1;
+                dfs( g,visit, g[val][j].first, target, path*g[val][j].second );
+                visit[ g[val][j].first ] = 0;
+            }
+        }
+    }
+
+    vector<double> calcEquation(vector<vector<string>>& equations, vector<double>& values, vector<vector<string>>& queries) {
+
+        //string - string(double)  a连接b(b带上权值)
+        unordered_map< string , vector<pair<string,double>> > g;
+        unordered_map<string,int> visit;
+
+        //构建无向图，a-b的value是3 的话 ，b-a是3的倒数
+        for(int i =0;i<equations.size();++i){
+            g[equations[i][0]].push_back( make_pair(equations[i][1], values[i] ) );
+            g[equations[i][1]].push_back( make_pair(equations[i][0], 1.0/values[i] ) );
+        }
+
+        //遍历queries，对每一组进行dfs计算结果。
+        //如果相连接，就把 路径上的权值相乘就是结果
+
+        for(int i =0; i<queries.size();++i){
+            
+            //如果queries[0]是不存在的，直接出结果：-1
+            if( g.find(queries[i][0]) == g.end() ){
+                res.push_back(-1.0);
+                continue;
+            }
+                
+            //设置一个全局变量，如果进行dfs后，queries[0]到不了queries[1]，Nofind = true;
+            Nofand = true;
+
+            visit[queries[i][0]]=1;
+            dfs(g,visit,queries[i][0],queries[i][1],1);
+            visit[queries[i][0]]=0;
+
+            if( Nofand )
+            res.push_back(-1.0);
+        }
+
+        return res;
+    }
+};
+
+```
+* BFS
+```c++
+class Solution {
+public:
+    unordered_map<string, vector<pair<string, double>>> edges;
+    double BFS(string start,string end) {
+        if (edges.find(start) == edges.end() || edges.find(end) == edges.end())return (double)-1;
+        queue<pair<string, double>> que;//BFS需要队列
+        unordered_set<string> used;//记录遍历过的点
+        que.push({ start,1 });//放入起始点
+        used.insert(start);//记录
+        while (!que.empty()) {
+            string curNode = que.front().first;
+            double curRes = que.front().second;
+            if (curNode == end) return curRes;//找到直接返回
+            que.pop();
+            if (edges.find(curNode) == edges.end())continue;
+            for (int i = 0; i < edges[curNode].size(); i++) {//遍历邻接点
+                string newNode = edges[curNode][i].first;
+                double newRes = curRes * edges[curNode][i].second;//计算下一个点的结果
+                if (used.find(newNode) != used.end())continue;
+                used.insert(newNode);//标记已使用
+                que.push({ newNode,newRes });//入队继续遍历
+            }
+        }
+        return (double)-1;//没找到返回-1
+    }
+    vector<double> calcEquation(vector<vector<string>>& equations, vector<double>& values, vector<vector<string>>& queries) {
+        vector<double> res;
+        for (int i = 0; i < equations.size(); i++) {//建图
+            edges[equations[i][0]].push_back({ equations[i][1],values[i] });
+            edges[equations[i][1]].push_back({ equations[i][0],1.0 / values[i] });
+        }
+        for (int i = 0; i < queries.size(); i++) {//对每个公式计算结果
+            res.push_back(BFS(queries[i][0], queries[i][1]));
+        }
+        return res;
+    }
+};
+class Solution {
+    unordered_map<string, unordered_map<string, double>> edges;
+public:
+    double dfs(string start, string end, unordered_set<string>& used)
+    {
+        if (start == end) return 1.0;
+        used.insert(start);
+        for (auto &path : edges[start]) {
+            auto curNode = path.first;      // to 代表的字符串
+            auto curVal = path.second;    //从 from 到 to 的值
+
+            if (used.find(curNode) == used.end()) {
+                auto newVal = dfs(curNode, end, used);
+                if (newVal > 0) return curVal * newVal;
+            }
+        }
+        used.erase(start);
+        return -1.0;                        //返回负数表示无可达路径
+    }
+
+    vector<double> calcEquation(vector<vector<string>>& equations, vector<double>& values,
+                                vector<vector<string>>& queries) {
+
+        for (int i = 0; i < equations.size(); ++ i)  {       //建图
+            edges[equations[i][0]][equations[i][1]] = values[i];         //从 from 到 to
+            edges[equations[i][1]][equations[i][0]] = 1.0 / values[i];   //从 to 到 from
+        }
+        vector<double> res;
+        for (int i = 0; i < queries.size(); ++ i) {
+            string from = queries[i][0];
+            string to = queries[i][1];
+            if (edges.find(from) == edges.end() || edges.find(to) == edges.end()) res.push_back(-1);              //找不到终点或起点的情况，即不可达
+            else {
+                unordered_set<string> used;  //用一个哈希表记录走过的点
+                res.push_back(dfs(from, to ,used));
+            }
+        }
+        return res;
+    }
+};
+```
+#### 329. 矩阵中的最长递增路径
+给定一个 m x n 整数矩阵 matrix ，找出其中 最长递增路径 的长度。
+对于每个单元格，你可以往上，下，左，右四个方向移动。 你 不能 在 对角线 方向上移动或移动到 边界外（即不允许环绕）。
+示例 1：
+
+输入：matrix = [[9,9,4],[6,6,8],[2,1,1]]
+输出：4
+解释：最长递增路径为 [1, 2, 6, 9]。
+```c++
+class Solution {
+public:
+    int dfs(vector<vector<int>>& memo, vector<vector<int>>& matrix, int i, int j) {
+        if (memo[i][j] != 0)
+            return memo[i][j];
+        memo[i][j]++;
+        if (i - 1 >= 0 && matrix[i - 1][j] > matrix[i][j])
+            memo[i][j] = max(memo[i][j], dfs(memo, matrix, i - 1, j) + 1);
+        if (i + 1 < matrix.size() && matrix[i + 1][j] > matrix[i][j])
+            memo[i][j] = max(memo[i][j], dfs(memo, matrix, i + 1, j) + 1);
+        if (j - 1 >= 0 && matrix[i][j - 1] > matrix[i][j])
+            memo[i][j] = max(memo[i][j], dfs(memo, matrix, i, j - 1) + 1);
+        if (j + 1 < matrix[0].size() && matrix[i][j + 1] > matrix[i][j])
+            memo[i][j] = max(memo[i][j], dfs(memo, matrix, i, j + 1) + 1);
+        return memo[i][j];
+    }
+    int longestIncreasingPath(vector<vector<int>>& matrix) {
+        if (matrix.size() == 0)
+            return 0;
+        int ans = 0;
+        vector<vector<int>> memo(matrix.size(), vector<int>(matrix[0].size(), 0));
+        for (int i = 0; i < matrix.size(); i++)
+            for (int j = 0; j < matrix[i].size(); j++)
+                ans = max(ans, dfs(memo, matrix, i, j));
+        return ans;
+    }
+};
+
+```
+```c++
+class Solution {
+public:
+    int n, m;
+    vector<vector<int>> g;
+    int dx[4] = {0, 1, 0, -1};
+    int dy[4] = {1, 0, -1, 0};
+    int dfs(int x, int y, vector<vector<int>>& f){
+        if(f[x][y] != 0) return f[x][y];
+        int res = 1;
+        for(int i=0; i<4; i++){
+            int a = x + dx[i];
+            int b = y + dy[i];
+            if(a >=0 && a < n && b >= 0 && b < m && g[a][b] > g[x][y]){
+                res = max(res, dfs(a, b, f)+1);
+            }
+        }
+        f[x][y] = res;
+        return res;
+    }
+    int longestIncreasingPath(vector<vector<int>>& matrix) {
+        n = matrix.size();
+        m = matrix[0].size();
+        vector<vector<int>> f(n, vector<int>(m, 0));
+        g = matrix;
+        int res = 1;
+        for(int i=0; i<n; i++){
+            for(int j=0; j<m; j++){
+                res = max(res, dfs(i, j, f));
+            }
+        }
+        return res;
+    }
+};
+ int dfs(vector<vector<int>>& matrix, vector<vector<int>>& lengths, int i, int j)
+    {
+        if (lengths[i][j] != 0)
+        {
+            return lengths[i][j];   //当前节点已计算过，直接返回其值，避免重复计算
+        }
+
+        vector<pair<int, int>> dirs = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
+        int length = 1;             //长度初始为1，即当前一个节点
+
+        for (pair<int, int> dir : dirs)
+        {
+            int x = i + dir.first;
+            int y = j + dir.second;
+
+            if (x >= 0 && x < matrix.size() && y >= 0 && y < matrix[0].size() && matrix[x][y] > matrix[i][j])
+            {
+                // +1 表示包含当前点的长度
+                length = max(length, dfs(matrix, lengths, x, y) + 1);
+            }
+        }
+
+        lengths[i][j] = length;     //记录该点的最长路径
+        return length;
+    }
+
+    int longestIncreasingPath(vector<vector<int>>& matrix) {
+        vector<vector<int>> lengths(matrix.size(), vector<int>(matrix[0].size()));
+
+        int longest = 0;
+        for (int i = 0; i < matrix.size(); ++ i)
+        {
+            for (int j = 0; j < matrix[0].size(); ++ j)
+            {
+                longest = max(longest, dfs(matrix, lengths, i, j));
+            }
+        }
+
+        return longest;
+    }
+};
+
+
+```
+```c++
+class Solution {
+public:
+    int result=-1;  //用result存储最长路径长度
+    int longestIncreasingPath(vector<vector<int>>& matrix) {
+        vector<vector<int>> book(matrix.size(),vector<int>(matrix[0].size(),-1));  //book记录矩阵中每个位置，以该位置为起点时，最长递增路径的长度，初始值设为-1
+        for(int i=0;i<matrix.size();i++) //遍历矩阵
+        {
+            for(int j=0;j<matrix[0].size();j++)
+            {
+                if(book[i][j]==-1) //book值为-1说明之前未搜索过该点，需要进行搜索
+                {
+                    int maxValue=dfs(matrix,i,j,-1,book);
+                    result=max(maxValue,result);
+                }
+                else{
+                    result=max(book[i][j],result); //如果之前搜索过，book中会记录以该点为起点的最长路径长度，此时直接返回该值，无需进行搜索
+                }
+            }
+        }
+        return result;
+    }
+
+    int dfs(vector<vector<int>> &matrix,int i,int j,int pre,vector<vector<int>> &book)//传入参数如所示，其中要注意matrix要传引用，不然每次递归都会复制一个新的矩阵，很耗费时间，之前一直超时就是因为没传引用
+    {
+        if(i<0||i>=matrix.size()||j<0||j>=matrix[0].size()) return 0; //越界则返回0
+        if(matrix[i][j]<=pre) return 0; //不为递增的方向也返回0
+        if(book[i][j]!=-1) return book[i][j]; //如果之前访问过，book有记录，直接返回book值
+
+        int a=dfs(matrix,i+1,j,matrix[i][j],book);
+        int b=dfs(matrix,i-1,j,matrix[i][j],book);
+        int c=dfs(matrix,i,j+1,matrix[i][j],book);
+        int d=dfs(matrix,i,j-1,matrix[i][j],book); //对每个点的四个方向进行搜索，取四个方向中的最长值，+1后为该点的最长路径长度，在book中进行记录，同时返回该值
+
+        int tmp1=max(a,b);
+        int tmp2=max(c,d);
+        book[i][j]=max(tmp1,tmp2)+1;
+        return book[i][j];
+    }
+};
+
+```
+#### 210. 课程表 II * BFS 拓扑排序
+现在你总共有 numCourses 门课需要选，记为 0 到 numCourses - 1。给你一个数组 prerequisites ，其中 prerequisites[i] = [ai, bi] ，表示在选修课程 ai 前 必须 先选修 bi 。
+例如，想要学习课程 0 ，你需要先完成课程 1 ，我们用一个匹配来表示：[0,1] 。
+返回你为了学完所有课程所安排的学习顺序。可能会有多个正确的顺序，你只要返回 任意一种 就可以了。如果不可能完成所有课程，返回 一个空数组 。
+示例 1：
+
+输入：numCourses = 2, prerequisites = [[1,0]]
+输出：[0,1]
+解释：总共有 2 门课程。要学习课程 1，你需要先完成课程 0。因此，正确的课程顺序为 [0,1] 。
+```c++
+class Solution {
+public:
+    vector<int> findOrder(int numCourses, vector<vector<int>>& prerequisites) {
+        vector<vector<int>> graph(numCourses);
+        vector<int> indegree(numCourses);
+        vector<int> ans;
+        // 建图
+        for (int i = prerequisites.size() - 1; i >= 0; i--) {
+            // v[1] -> v[0]
+            indegree[prerequisites[i][0]]++;
+            graph[prerequisites[i][1]].push_back(prerequisites[i][0]);
+        }
+        // 拓扑排序
+        int remainNode = numCourses;
+        queue<int> q;
+        for (int i = 0; i < numCourses; i++) {
+            if (!indegree[i]) {
+                remainNode--;
+                q.push(i);
+                ans.push_back(i);
+            }
+        }
+        while (q.size()) {
+            int thisNode = q.front();
+            q.pop();
+            for (int& toNode : graph[thisNode]) {
+                indegree[toNode]--;
+                if (!indegree[toNode]) {
+                    remainNode--;
+                    q.push(toNode);
+                    ans.push_back(toNode);
+                }
+            }
+        }
+
+        if (remainNode) {
+            return {};
+        }
+        else {
+            return ans;
+        }
+    }
+};
+
+class Solution {
+public:
+    vector<int> findOrder(int numCourses, vector<vector<int>>& prerequisites) {
+        // 每个课程的依赖数目
+        unordered_map<int, int> inDegree;
+        // 课程到其后继课程的映射
+        unordered_map<int, vector<int>> adjust;
+        for (auto item: prerequisites) {
+            int to = item[0];
+            int from = item[1];
+            inDegree[to]++;
+            adjust[from].push_back(to);
+        }
+     
+        // 所有无依赖的课程 入度 = 0
+        queue<int> que;
+        for (int i = 0; i < numCourses; i++) {
+            if (inDegree.find(i) == inDegree.end()) {
+                que.push(i);
+            }
+        }
+
+        vector<int> result;
+        while (!que.empty()) {
+            int curNode = que.front();
+            que.pop();
+            result.push_back(curNode);
+            // 将该课程的所有后继课程的依赖数减一
+            for (auto course: adjust[curNode]) {
+                inDegree[course]--;
+                // 当该课程的依赖数目为0时，则加入到队列中，并从有依赖的课程中移出
+                if (inDegree[course] == 0) {
+                    que.push(course);
+                    inDegree.erase(course);
+                }
+            }
+        }
+        
+        if (!inDegree.empty()) {
+            result = {};
+        }
+        return result;
+    }
+};
+```
+#### 剑指 Offer II 115. 重建序列
+给定一个长度为 n 的整数数组 nums ，其中 nums 是范围为 [1，n] 的整数的排列。还提供了一个 2D 整数数组 sequences ，其中 sequences[i] 是 nums 的子序列。
+检查 nums 是否是唯一的最短 超序列 。最短 超序列 是 长度最短 的序列，并且所有序列 sequences[i] 都是它的子序列。对于给定的数组 sequences ，可能存在多个有效的 超序列 。
+
+例如，对于 sequences = [[1,2],[1,3]] ，有两个最短的 超序列 ，[1,2,3] 和 [1,3,2] 。
+而对于 sequences = [[1,2],[1,3],[1,2,3]] ，唯一可能的最短 超序列 是 [1,2,3] 。[1,2,3,4] 是可能的超序列，但不是最短的。
+如果 nums 是序列的唯一最短 超序列 ，则返回 true ，否则返回 false 。
+子序列 是一个可以通过从另一个序列中删除一些元素或不删除任何元素，而不改变其余元素的顺序的序列。
+示例 1：
+
+输入：nums = [1,2,3], sequences = [[1,2],[1,3]]
+输出：false
+解释：有两种可能的超序列：[1,2,3]和[1,3,2]。
+序列 [1,2] 是[1,2,3]和[1,3,2]的子序列。
+序列 [1,3] 是[1,2,3]和[1,3,2]的子序列。
+因为 nums 不是唯一最短的超序列，所以返回false。
+```c++
+// 拓扑排序
+class Solution {
+public:
+    bool sequenceReconstruction(vector<int>& nums, vector<vector<int>>& sequences) {
+        int n = nums.size();
+        vector<int> indegrees(n + 1);
+        vector<unordered_set<int>> graph(n + 1);
+        for (const auto& sequence : sequences) {
+            for (int i = 0; i + 1 < sequence.size(); i++) {
+                int u = sequence[i], v = sequence[i + 1];   // u -> v
+                if (!graph[u].count(v)) {
+                    graph[u].emplace(v);
+                    ++indegrees[v];
+                }
+            }
+        }
+        queue<int> q;
+        for (int i = 1; i <= n; i++) {
+            if (!indegrees[i]) {
+                q.emplace(i);
+            }
+        }
+        if (q.size() != 1) return false;
+
+        vector<int> seq;
+        while (!q.empty()) {
+            int u = q.front(); q.pop();
+            seq.emplace_back(u);
+            for (int v : graph[u]) {
+                if (!--indegrees[v]) {
+                    q.emplace(v);
+                }
+            }
+            if (q.size() > 1) return false;
+        }
+        
+        return seq == nums;
+    }
+};
+```
+#### 547. 省份数量 * DFS * BFS * 并查集
+有 n 个城市，其中一些彼此相连，另一些没有相连。如果城市 a 与城市 b 直接相连，且城市 b 与城市 c 直接相连，那么城市 a 与城市 c 间接相连。
+省份 是一组直接或间接相连的城市，组内不含其他没有相连的城市。
+给你一个 n x n 的矩阵 isConnected ，其中 isConnected[i][j] = 1 表示第 i 个城市和第 j 个城市直接相连，而 isConnected[i][j] = 0 表示二者不直接相连。
+返回矩阵中 省份 的数量。
+```c++
+class Solution {
+public:
+    int findCircleNum(vector<vector<int>>& isConnected) {
+        
     }
 };
 ```

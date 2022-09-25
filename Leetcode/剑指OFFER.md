@@ -3825,7 +3825,7 @@ public:
 ```c++
 
 ```
-### 剑指 Offer II 107. 矩阵中的距离
+### 剑指 Offer II 107. 矩阵中的距离 * BFS
 给定一个由 0 和 1 组成的矩阵 mat ，请输出一个大小相同的矩阵，其中每一个格子是 mat 中对应位置元素到最近的 0 的距离。
 
 两个相邻元素间的距离为 1 。
@@ -3896,19 +3896,156 @@ public:
 graph 的第 i 个数组中的单元都表示有向图中 i 号节点所能到达的下一些结点（译者注：有向图是有方向的，即规定了 a→b 你就不能从 b→a ），若为空，就是没有下一个节点了。
 
 ```c++
-
+class Solution {
+    vector<int> path;
+    vector<vector<int>> result;
+    void dfs(vector<vector<int>>& graph, int x) {
+        if (x == graph.size() - 1) {
+            result.push_back(path);
+            return ;
+        }
+        for(int i = 0; i < graph[x].size(); i++) {
+            path.push_back(grah[x][i]);
+            dfs(graph, grah[x][i]);
+            path.pop_back();
+        }
+    }
+public:
+    vector<vector<int>> allPathsSourceTarget(vector<vector<int>>& graph) {
+        path.push_back(0);
+        dfs(graph, 0);
+    }
+};
 ```
 
+#### 剑指 Offer II 111. 计算除法
+给定一个变量对数组 equations 和一个实数值数组 values 作为已知条件，其中 equations[i] = [Ai, Bi] 和 values[i] 共同表示等式 Ai / Bi = values[i] 。每个 Ai 或 Bi 是一个表示单个变量的字符串。
+另有一些以数组 queries 表示的问题，其中 queries[j] = [Cj, Dj] 表示第 j 个问题，请你根据已知条件找出 Cj / Dj = ? 的结果作为答案。
+返回 所有问题的答案 。如果存在某个无法确定的答案，则用 -1.0 替代这个答案。如果问题中出现了给定的已知条件中没有出现的字符串，也需要用 -1.0 替代这个答案。
+注意：输入总是有效的。可以假设除法运算中不会出现除数为 0 的情况，且不存在任何矛盾的结果。
+示例 1：
 
+输入：equations = [["a","b"],["b","c"]], values = [2.0,3.0], queries = [["a","c"],["b","a"],["a","e"],["a","a"],["x","x"]]
+输出：[6.00000,0.50000,-1.00000,1.00000,-1.00000]
+解释：
+条件：a / b = 2.0, b / c = 3.0
+问题：a / c = ?, b / a = ?, a / e = ?, a / a = ?, x / x = ?
+结果：[6.0, 0.5, -1.0, 1.0, -1.0 ]
+```c++
+class Solution {
+public:
+    vector<double> calcEquation(vector<vector<string>>& equations, vector<double>& values, vector<vector<string>>& queries) {
 
+    }
+};
+```
+#### 剑指 Offer II 112. 最长递增路径 
+给定一个 m x n 整数矩阵 matrix ，找出其中 最长递增路径 的长度。
+对于每个单元格，你可以往上，下，左，右四个方向移动。 不能 在 对角线 方向上移动或移动到 边界外（即不允许环绕）。
+示例 1：
+输入：matrix = [[9,9,4],[6,6,8],[2,1,1]]
+输出：4
+解释：最长递增路径为 [1, 2, 6, 9]。
+```c++
+class Solution {
+public:
+    int longestIncreasingPath(vector<vector<int>>& matrix) {
+        
+    }
+};
+```
+#### 剑指 Offer II 113. 课程顺序 拓扑排序
+现在总共有 numCourses 门课需要选，记为 0 到 numCourses-1。
+给定一个数组 prerequisites ，它的每一个元素 prerequisites[i] 表示两门课程之间的先修顺序。 例如 prerequisites[i] = [ai, bi] 表示想要学习课程 ai ，需要先完成课程 bi 。
+请根据给出的总课程数  numCourses 和表示先修顺序的 prerequisites 得出一个可行的修课序列。
+可能会有多个正确的顺序，只要任意返回一种就可以了。如果不可能完成所有课程，返回一个空数组。
+示例 1:
 
+输入: numCourses = 2, prerequisites = [[1,0]]
+输出: [0,1]
+解释: 总共有 2 门课程。要学习课程 1，你需要先完成课程 0。因此，正确的课程顺序为 [0,1] 。
+```c++
+class Solution {
+public:
+    vector<int> findOrder(int numCourses, vector<vector<int>>& prerequisites) {
+        
+    }
+};
+```
+#### 剑指 Offer II 115. 重建序列 拓扑排序
+给定一个长度为 n 的整数数组 nums ，其中 nums 是范围为 [1，n] 的整数的排列。还提供了一个 2D 整数数组 sequences ，其中 sequences[i] 是 nums 的子序列。
+检查 nums 是否是唯一的最短 超序列 。最短 超序列 是 长度最短 的序列，并且所有序列 sequences[i] 都是它的子序列。对于给定的数组 sequences ，可能存在多个有效的 超序列 。
+例如，对于 sequences = [[1,2],[1,3]] ，有两个最短的 超序列 ，[1,2,3] 和 [1,3,2] 。
+而对于 sequences = [[1,2],[1,3],[1,2,3]] ，唯一可能的最短 超序列 是 [1,2,3] 。[1,2,3,4] 是可能的超序列，但不是最短的。
+如果 nums 是序列的唯一最短 超序列 ，则返回 true ，否则返回 false 。
+子序列 是一个可以通过从另一个序列中删除一些元素或不删除任何元素，而不改变其余元素的顺序的序列。
+示例 1：
 
+输入：nums = [1,2,3], sequences = [[1,2],[1,3]]
+输出：false
+解释：有两种可能的超序列：[1,2,3]和[1,3,2]。
+序列 [1,2] 是[1,2,3]和[1,3,2]的子序列。
+序列 [1,3] 是[1,2,3]和[1,3,2]的子序列。
+因为 nums 不是唯一最短的超序列，所以返回false。
+````c++
+class Solution {
+public:
+    bool sequenceReconstruction(vector<int>& nums, vector<vector<int>>& sequences) {
 
+    }
+};
+````
+#### 剑指 Offer II 116. 省份数量
+有 n 个城市，其中一些彼此相连，另一些没有相连。如果城市 a 与城市 b 直接相连，且城市 b 与城市 c 直接相连，那么城市 a 与城市 c 间接相连。
+省份 是一组直接或间接相连的城市，组内不含其他没有相连的城市。
+给你一个 n x n 的矩阵 isConnected ，其中 isConnected[i][j] = 1 表示第 i 个城市和第 j 个城市直接相连，而 isConnected[i][j] = 0 表示二者不直接相连。
+返回矩阵中 省份 的数量。
+示例 1：
+输入：isConnected = [[1,1,0],[1,1,0],[0,0,1]]
+输出：2
 
+```c++
+class Solution {
+public:
+    int findCircleNum(vector<vector<int>>& isConnected) {
 
+    }
+};
+```
+####  剑指 Offer II 118. 多余的边
+树可以看成是一个连通且 无环 的 无向 图。
+给定往一棵 n 个节点 (节点值 1～n) 的树中添加一条边后的图。添加的边的两个顶点包含在 1 到 n 中间，且这条附加的边不属于树中已存在的边。图的信息记录于长度为 n 的二维数组 edges ，edges[i] = [ai, bi] 表示图中在 ai 和 bi 之间存在一条边。
+请找出一条可以删去的边，删除后可使得剩余部分是一个有着 n 个节点的树。如果有多个答案，则返回数组 edges 中最后出现的边。
+示例 1：
 
+输入: edges = [[1,2],[1,3],[2,3]]
+输出: [2,3]
+```c++
+class Solution {
+public:
+    vector<int> findRedundantConnection(vector<vector<int>>& edges) {
 
+    }
+};
+```
+#### 剑指 Offer II 119. 最长连续序列
+给定一个未排序的整数数组 nums ，找出数字连续的最长序列（不要求序列元素在原数组中连续）的长度。
+示例 1：
 
+输入：nums = [100,4,200,1,3,2]
+输出：4
+解释：最长数字连续序列是 [1, 2, 3, 4]。它的长度为 4。
+示例 2：
+输入：nums = [0,3,7,2,5,8,4,6,0,1]
+输出：9
+```c++
+class Solution {
+public:
+    int longestConsecutive(vector<int>& nums) {
+
+    }
+};
+```
 
 
 
