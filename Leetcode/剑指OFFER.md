@@ -1,6 +1,7 @@
 
 https://oi-wiki.org/string/match/
 https://github.com/xiaobaiTech/golangFamily
+https://imageslr.com/
 #### 由数据范围反推算法复杂度以及算法内容
 ![img.png](img.png)
 
@@ -3728,25 +3729,6 @@ public:
         return res;
     }
 };
-    int minimumTotal(vector<vector<int>>& triangle) {
-        vector<vector<int>> dp(triangle.size(), vector<int>(triangle[0].size(), 0));
-        for(int i = 0; i < triangle.size(); i++) {
-            for(int j = 0; j < triangle[0].size(); j++) {
-                if(i == 0 && j == 0) dp[0][0] = triangle[0][0];
-                else if(j == 0) dp[i][j] = dp[i - 1][j] + triangle[i][j];
-                else if(j == triangle[i].size() - 1) {
-                    dp[i][j] = dp[i - 1][j - 1] + triangle[i][j];
-                } else {
-                    dp[i][j] = min(dp[i - 1][j], dp[i - 1][j - 1]) + triangle[i][j];
-                }
-            }
-        }
-        int res = dp[triangle.size() - 1][0];
-        for(int i = 0; i < dp[triangle.size() - 1].size(); i ++) {
-            if(dp[triangle.size() - 1][i] < res) res = dp[triangle.size() - 1][i];
-        }
-        return res;
-    }
 ```
 ```c++
 class Solution {
@@ -3775,26 +3757,11 @@ public:
 class Solution {
 public:
     int findTargetSumWays(vector<int>& nums, int target) {
-           int sum = 0;
-           for(auto &num : nums) {
-               sum += num;
-           } 
-           if(abs(target) > sum) return 0;
-           if((target + sum) % 2 == 1) return 0;
-           int bagSize = (target + sum) / 2;
-           if (bagSize < 0) return 0;
-           vector<int> dp(bagSize + 1, 0);
-           dp[0] = 1;
-           for(int i = 0; i < nums.size(); i++) {
-               for(int j = bagSize; j >= nums[i]; j--) {
-                   dp[j] += dp[j - nums[i]];
-               }
-           }  
-           return dp[bagSize];
+
     }
 };
 ```
-#### 剑指 Offer II 103. 最少的硬币数目
+#### 剑指 Offer II 103. 最少的硬币数目 *
 给定不同面额的硬币 coins 和一个总金额 amount。编写一个函数来计算可以凑成总金额所需的最少的硬币个数。如果没有任何一种硬币组合能组成总金额，返回 -1。
 你可以认为每种硬币的数量是无限的。
 
@@ -3807,10 +3774,288 @@ public:
 class Solution {
 public:
     int coinChange(vector<int>& coins, int amount) {
+
+    }
+};
+```
+#### 剑指 Offer II 104. 排列的数目 *
+给定一个由 不同 正整数组成的数组 nums ，和一个目标整数 target 。请从 nums 中找出并返回总和为 target 的元素组合的个数。数组中的数字可以在一次排列中出现任意次，但是顺序不同的序列被视作不同的组合。
+题目数据保证答案符合 32 位整数范围。
+
+示例 1：
+
+输入：nums = [1,2,3], target = 4
+输出：7
+解释：
+所有可能的组合为：
+(1, 1, 1, 1)
+(1, 1, 2)
+(1, 2, 1)
+(1, 3)
+(2, 1, 1)
+(2, 2)
+(3, 1)
+请注意，顺序不同的序列被视作不同的组合。
+```c++
+class Solution {
+public:
+    int combinationSum4(vector<int>& nums, int target) {
+
+    }
+};
+```
+#### 剑指 Offer II 105. 岛屿的最大面积
+给定一个由 0 和 1 组成的非空二维数组 grid ，用来表示海洋岛屿地图。
+一个 岛屿 是由一些相邻的 1 (代表土地) 构成的组合，这里的「相邻」要求两个 1 必须在水平或者竖直方向上相邻。你可以假设 grid 的四个边缘都被 0（代表水）包围着。
+找到给定的二维数组中最大的岛屿面积。如果没有岛屿，则返回面积为 0
+```c++
+
+```
+#### 剑指 Offer II 106. 二分图
+存在一个 无向图 ，图中有 n 个节点。其中每个节点都有一个介于 0 到 n - 1 之间的唯一编号。
+给定一个二维数组 graph ，表示图，其中 graph[u] 是一个节点数组，由节点 u 的邻接节点组成。形式上，对于 graph[u] 中的每个 v ，都存在一条位于节点 u 和节点 v 之间的无向边。该无向图同时具有以下属性：
+
+不存在自环（graph[u] 不包含 u）。
+不存在平行边（graph[u] 不包含重复值）。
+如果 v 在 graph[u] 内，那么 u 也应该在 graph[v] 内（该图是无向图）
+这个图可能不是连通图，也就是说两个节点 u 和 v 之间可能不存在一条连通彼此的路径。
+二分图 定义：如果能将一个图的节点集合分割成两个独立的子集 A 和 B ，并使图中的每一条边的两个节点一个来自 A 集合，一个来自 B 集合，就将这个图称为 二分图 。
+
+如果图是二分图，返回 true ；否则，返回 false 。
+```c++
+
+```
+### 剑指 Offer II 107. 矩阵中的距离 * BFS
+给定一个由 0 和 1 组成的矩阵 mat ，请输出一个大小相同的矩阵，其中每一个格子是 mat 中对应位置元素到最近的 0 的距离。
+
+两个相邻元素间的距离为 1 。
+```c++
+
+```
+#### 剑指 Offer II 108. 单词演变
+在字典（单词列表） wordList 中，从单词 beginWord 和 endWord 的 转换序列 是一个按下述规格形成的序列：
+
+序列中第一个单词是 beginWord 。
+序列中最后一个单词是 endWord 。
+每次转换只能改变一个字母。
+转换过程中的中间单词必须是字典 wordList 中的单词。
+给定两个长度相同但内容不同的单词 beginWord 和 endWord 和一个字典 wordList ，找到从 beginWord 到 endWord 的 最短转换序列 中的 单词数目 。如果不存在这样的转换序列，返回 0。
+```c++
+
+```
+### 剑指 Offer II 109. 开密码锁
+一个密码锁由 4 个环形拨轮组成，每个拨轮都有 10 个数字： '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' 。每个拨轮可以自由旋转：例如把 '9' 变为 '0'，'0' 变为 '9' 。每次旋转都只能旋转一个拨轮的一位数字。
+
+锁的初始数字为 '0000' ，一个代表四个拨轮的数字的字符串。
+
+列表 deadends 包含了一组死亡数字，一旦拨轮的数字和列表里的任何一个元素相同，这个锁将会被永久锁定，无法再被旋转。
+
+字符串 target 代表可以解锁的数字，请给出解锁需要的最小旋转次数，如果无论如何不能解锁，返回 -1 。
+```c++
+class Solution {
+public:
+    int openLock(vector<string>& deadends, string target) {
+        queue<pair<string, int>> que;
+        unordered_map<string, bool> umap;
+
+        for(auto & dend : deadends) {
+            umap[dend] = true;
+        }
+        string s = "0000";
+        if(umap[s]) return -1;
+        umap[s] = true;
+        que.emplace(s, 0);
+        while(!que.empty()) {
+            auto node = que.front();
+            que.pop();
+            if(node.first == target) return node.second;
+            for(int i = 0; i < 4; i++) {
+                auto temp = node.first;
+                auto num = node.second;
+                temp[i] = temp[i] == '9' ? '0' : temp[i] + 1;
+                if(!umap[temp]) {
+                    umap[temp] = true;
+                    que.emplace(temp, num + 1);
+                }
+                temp = node.first;
+                temp[i] = temp[i] == '0' ? '9' : temp[i] - 1;
+                if(!umap[temp]) {
+                    umap[temp] = true;
+                    que.emplace(temp, num + 1);
+                    
+                }
+            }
+        }
+        return -1;
+    }
+};
+```
+#### 剑指 Offer II 110. 所有路径
+给定一个有 n 个节点的有向无环图，用二维数组 graph 表示，请找到所有从 0 到 n-1 的路径并输出（不要求按顺序）。
+
+graph 的第 i 个数组中的单元都表示有向图中 i 号节点所能到达的下一些结点（译者注：有向图是有方向的，即规定了 a→b 你就不能从 b→a ），若为空，就是没有下一个节点了。
+
+```c++
+class Solution {
+    vector<int> path;
+    vector<vector<int>> result;
+    void dfs(vector<vector<int>>& graph, int x) {
+        if (x == graph.size() - 1) {
+            result.push_back(path);
+            return ;
+        }
+        for(int i = 0; i < graph[x].size(); i++) {
+            path.push_back(grah[x][i]);
+            dfs(graph, grah[x][i]);
+            path.pop_back();
+        }
+    }
+public:
+    vector<vector<int>> allPathsSourceTarget(vector<vector<int>>& graph) {
+        path.push_back(0);
+        dfs(graph, 0);
+    }
+};
+```
+
+#### 剑指 Offer II 111. 计算除法
+给定一个变量对数组 equations 和一个实数值数组 values 作为已知条件，其中 equations[i] = [Ai, Bi] 和 values[i] 共同表示等式 Ai / Bi = values[i] 。每个 Ai 或 Bi 是一个表示单个变量的字符串。
+另有一些以数组 queries 表示的问题，其中 queries[j] = [Cj, Dj] 表示第 j 个问题，请你根据已知条件找出 Cj / Dj = ? 的结果作为答案。
+返回 所有问题的答案 。如果存在某个无法确定的答案，则用 -1.0 替代这个答案。如果问题中出现了给定的已知条件中没有出现的字符串，也需要用 -1.0 替代这个答案。
+注意：输入总是有效的。可以假设除法运算中不会出现除数为 0 的情况，且不存在任何矛盾的结果。
+示例 1：
+
+输入：equations = [["a","b"],["b","c"]], values = [2.0,3.0], queries = [["a","c"],["b","a"],["a","e"],["a","a"],["x","x"]]
+输出：[6.00000,0.50000,-1.00000,1.00000,-1.00000]
+解释：
+条件：a / b = 2.0, b / c = 3.0
+问题：a / c = ?, b / a = ?, a / e = ?, a / a = ?, x / x = ?
+结果：[6.0, 0.5, -1.0, 1.0, -1.0 ]
+```c++
+class Solution {
+public:
+    vector<double> calcEquation(vector<vector<string>>& equations, vector<double>& values, vector<vector<string>>& queries) {
+
+    }
+};
+```
+#### 剑指 Offer II 112. 最长递增路径 
+给定一个 m x n 整数矩阵 matrix ，找出其中 最长递增路径 的长度。
+对于每个单元格，你可以往上，下，左，右四个方向移动。 不能 在 对角线 方向上移动或移动到 边界外（即不允许环绕）。
+示例 1：
+输入：matrix = [[9,9,4],[6,6,8],[2,1,1]]
+输出：4
+解释：最长递增路径为 [1, 2, 6, 9]。
+```c++
+class Solution {
+public:
+    int longestIncreasingPath(vector<vector<int>>& matrix) {
         
     }
 };
 ```
+#### 剑指 Offer II 113. 课程顺序 拓扑排序
+现在总共有 numCourses 门课需要选，记为 0 到 numCourses-1。
+给定一个数组 prerequisites ，它的每一个元素 prerequisites[i] 表示两门课程之间的先修顺序。 例如 prerequisites[i] = [ai, bi] 表示想要学习课程 ai ，需要先完成课程 bi 。
+请根据给出的总课程数  numCourses 和表示先修顺序的 prerequisites 得出一个可行的修课序列。
+可能会有多个正确的顺序，只要任意返回一种就可以了。如果不可能完成所有课程，返回一个空数组。
+示例 1:
+
+输入: numCourses = 2, prerequisites = [[1,0]]
+输出: [0,1]
+解释: 总共有 2 门课程。要学习课程 1，你需要先完成课程 0。因此，正确的课程顺序为 [0,1] 。
+```c++
+class Solution {
+public:
+    vector<int> findOrder(int numCourses, vector<vector<int>>& prerequisites) {
+        
+    }
+};
+```
+#### 剑指 Offer II 115. 重建序列 拓扑排序
+给定一个长度为 n 的整数数组 nums ，其中 nums 是范围为 [1，n] 的整数的排列。还提供了一个 2D 整数数组 sequences ，其中 sequences[i] 是 nums 的子序列。
+检查 nums 是否是唯一的最短 超序列 。最短 超序列 是 长度最短 的序列，并且所有序列 sequences[i] 都是它的子序列。对于给定的数组 sequences ，可能存在多个有效的 超序列 。
+例如，对于 sequences = [[1,2],[1,3]] ，有两个最短的 超序列 ，[1,2,3] 和 [1,3,2] 。
+而对于 sequences = [[1,2],[1,3],[1,2,3]] ，唯一可能的最短 超序列 是 [1,2,3] 。[1,2,3,4] 是可能的超序列，但不是最短的。
+如果 nums 是序列的唯一最短 超序列 ，则返回 true ，否则返回 false 。
+子序列 是一个可以通过从另一个序列中删除一些元素或不删除任何元素，而不改变其余元素的顺序的序列。
+示例 1：
+
+输入：nums = [1,2,3], sequences = [[1,2],[1,3]]
+输出：false
+解释：有两种可能的超序列：[1,2,3]和[1,3,2]。
+序列 [1,2] 是[1,2,3]和[1,3,2]的子序列。
+序列 [1,3] 是[1,2,3]和[1,3,2]的子序列。
+因为 nums 不是唯一最短的超序列，所以返回false。
+````c++
+class Solution {
+public:
+    bool sequenceReconstruction(vector<int>& nums, vector<vector<int>>& sequences) {
+
+    }
+};
+````
+#### 剑指 Offer II 116. 省份数量
+有 n 个城市，其中一些彼此相连，另一些没有相连。如果城市 a 与城市 b 直接相连，且城市 b 与城市 c 直接相连，那么城市 a 与城市 c 间接相连。
+省份 是一组直接或间接相连的城市，组内不含其他没有相连的城市。
+给你一个 n x n 的矩阵 isConnected ，其中 isConnected[i][j] = 1 表示第 i 个城市和第 j 个城市直接相连，而 isConnected[i][j] = 0 表示二者不直接相连。
+返回矩阵中 省份 的数量。
+示例 1：
+输入：isConnected = [[1,1,0],[1,1,0],[0,0,1]]
+输出：2
+
+```c++
+class Solution {
+public:
+    int findCircleNum(vector<vector<int>>& isConnected) {
+
+    }
+};
+```
+####  剑指 Offer II 118. 多余的边
+树可以看成是一个连通且 无环 的 无向 图。
+给定往一棵 n 个节点 (节点值 1～n) 的树中添加一条边后的图。添加的边的两个顶点包含在 1 到 n 中间，且这条附加的边不属于树中已存在的边。图的信息记录于长度为 n 的二维数组 edges ，edges[i] = [ai, bi] 表示图中在 ai 和 bi 之间存在一条边。
+请找出一条可以删去的边，删除后可使得剩余部分是一个有着 n 个节点的树。如果有多个答案，则返回数组 edges 中最后出现的边。
+示例 1：
+
+输入: edges = [[1,2],[1,3],[2,3]]
+输出: [2,3]
+```c++
+class Solution {
+public:
+    vector<int> findRedundantConnection(vector<vector<int>>& edges) {
+
+    }
+};
+```
+#### 剑指 Offer II 119. 最长连续序列
+给定一个未排序的整数数组 nums ，找出数字连续的最长序列（不要求序列元素在原数组中连续）的长度。
+示例 1：
+
+输入：nums = [100,4,200,1,3,2]
+输出：4
+解释：最长数字连续序列是 [1, 2, 3, 4]。它的长度为 4。
+示例 2：
+输入：nums = [0,3,7,2,5,8,4,6,0,1]
+输出：9
+```c++
+class Solution {
+public:
+    int longestConsecutive(vector<int>& nums) {
+
+    }
+};
+```
+
+
+
+
+
+
+
+
+
+
 29. 两数相除
     给定两个整数，被除数 dividend 和除数 divisor。将两数相除，要求不使用乘法、除法和 mod 运算符。
 
