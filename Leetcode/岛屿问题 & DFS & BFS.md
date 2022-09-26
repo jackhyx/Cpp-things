@@ -1,17 +1,5 @@
 
-
-
-
 ![img_1.png](img_1.png)
-
-
-
-
-
-
-
-
-
 
 
 
@@ -96,6 +84,7 @@ public:
 
 
 ```
+
 * BFS
 ```c++
 class Solution {
@@ -284,6 +273,7 @@ public:
 岛屿 是由一些相邻的 1 (代表土地) 构成的组合，这里的「相邻」要求两个 1 必须在 水平或者竖直的四个方向上 相邻。你可以假设 grid 的四个边缘都被 0（代表水）包围着。
 岛屿的面积是岛上值为 1 的单元格的数目。
 计算并返回 grid 中最大的岛屿面积。如果没有岛屿，则返回面积为 0 。
+* DFS 修改原数组
 ```c++
 class Solution {
     int dfs(vector<vector<int>>& grid, int i, int j) {
@@ -317,6 +307,39 @@ public:
             }
         }
         return res;   
+    }
+};
+```
+* DFS 不修改原数组
+```c++
+class Solution {
+    int dfs(vector<vector<int>>& grid, vector<vector<bool>> &visited, int i , int j) {
+        int m = grid.size(), n = grid[0].size();
+        if(i < 0 || j < 0|| i >= m ||j >= n) return 0;
+        if(grid[i][j] == 0) return 0;
+        if(visited[i][j] == true) return 0;
+        visited[i][j] = true;
+        int count = 1;
+        count += dfs (grid, visited, i + 1, j);
+        count += dfs (grid, visited, i - 1, j);
+        count += dfs (grid, visited, i, j + 1);
+        count += dfs (grid, visited, i, j - 1);
+        return count;
+    }
+public:
+    int maxAreaOfIsland(vector<vector<int>>& grid) {
+        int m = grid.size(), n = grid[0].size();
+        vector<vector<bool>> visited(m, vector<bool>(n, false));
+        int res = 0;
+        for(int i = 0; i < m; i++) {
+            for(int j = 0; j < n; j++) {
+                if(grid[i][j] == 1 && visited[i][j] == false){
+                    res = max(res, dfs(grid, visited, i, j));
+                }
+                visited[i][j] = true;
+            }
+        }
+        return res;
     }
 };
 ```
@@ -397,6 +420,31 @@ public:
             }
         }
         return 0;   
+    }
+};
+```
+```c++
+class Solution {
+    int dfs(vector<vector<int>>& grid, vector<vector<bool>>& visited, int i, int j) {
+        int m = grid.size(), n = grid[0].size();
+        if(i < 0 || j < 0 || i >= m|| j >= n) return 1;
+        if(grid[i][j] == 0) return 1;
+        if(visited[i][j] == true) return 0;
+        visited[i][j] = true;
+        return dfs(grid, visited, i + 1, j) + dfs(grid, visited, i - 1, j) + dfs(grid, visited, i, j - 1) + dfs(grid, visited, i, j + 1);
+    }
+public:
+    int islandPerimeter(vector<vector<int>>& grid) {
+        int m = grid.size(), n = grid[0].size();
+        vector<vector<bool>> visited(m, vector<bool>(n, false));
+        for(int i = 0; i < m; i++) {
+            for(int j = 0; j < n ; j++) {
+                if(grid[i][j] == 1 && visited[i][j] == false) {
+                    return dfs(grid, visited, i, j);
+                }
+            }
+        }
+        return 0;
     }
 };
 ```
