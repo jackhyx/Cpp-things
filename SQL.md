@@ -92,4 +92,7 @@
 
 
 * mysql相关，mvcc、索引、redolog、undolog、binlog
+  mysql事务、事务特性
+
+mysql如何回滚
 
