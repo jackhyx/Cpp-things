@@ -10,7 +10,6 @@
 手撕：找出非空无序数组中第三大的数字 10mins
 手撕 lc 253
 394字符串解码，思路是递归和栈，没写出来
-反转链表，说一下它的时间o(n)和空间复杂度o(1)
 二分查找  和大于等于target的最短子数组
 
 算法 最长不重复子串长度
@@ -213,13 +212,6 @@ python的垃圾回收机制可以介绍下吗？你刚刚提到了标记清除�
 8. 你学的印象最深的技术是什么？（我说google test）
 9. 接上题，面试官问你怎么教新手google test。
 
-10. 刷题（20min）
-    给你一个链表，让你循环右移，打印新链表。
-    比如：
-    1->2->3->4,  k = 1
-    得到新链表：4->1->2->3
-    需要考虑边界条件。本来忘了把链表断开了，在面试官提醒下改正了。
-    答完了，面试官说有更好的方法。我突然想到可以用快慢指针，面试官说是的。
 
 
 
@@ -425,38 +417,6 @@ base选择
 代码题：最长公共前缀
 反问：部门工作
 
-
-mysql
-聊一聊mysql 你对索引的认识。
-其实比较大众化的问题，基本上是往着数据结构B+树角度去谈，为什么是B+。
-
-比如可以聊hash表、二叉树、多叉树等等，各自的优缺点；
-
-同时基础更好的同学可以围绕着 io ，page，innodb，b树b+树区别上聊，可以说很多。
-
-提到了聚簇索引，非聚簇索引。那非聚簇索引存的是什么？
-首先是要回答出，聚簇索引、非聚簇索引的区别，以及各自的存储引擎 是否涉及聚簇索引这个事情。然后才是存什么。
-
-概括上来说，跟数据绑定在一起的，就是聚簇索引；没有绑定在一起的就是非聚簇索引。
-
-可以接着延伸，回表，覆盖索引等等。
-
-网络
-osi 七层模型描述一下。
-描述每一个层，大概干什么作用，有什么协议即可。同理可以扩展5层，5层是把哪些合并了等等。
-
-当时复习没注意这个点，网络层传输层还说反了，答得不是很好。
-
-tcp udp有哪些区别？对应哪些应用场景？
-这个建议好好读计算机网络自顶向下，说的挺清楚的。
-
-最起码的有链接无连接，tcp的一些特性（可靠数据传输、拥塞机制、流量控制），比如应用场景 实时通信，比如报文头区别等等，可以涉及很多。
-
-tcp udp 哪个传输效率更高？
-效率更高这个我无从下手，当时就说 咱们评判效率标准是什么？比如我是追求传输的快？还是追求质量？按照我的框架下给出对应的答案。
-
-能不能基于udp完成可靠数据传输呢？
-这个问题就是顺着我说的质量，接着往下问的。应用层上可以做到的，书上也会讲到。
 
 多线程
 进程 线程 协程的区别
@@ -859,7 +819,7 @@ int main() {
 cout<<fun();
 }
 算法
-39. 组合总和
+
 
 字节一面（9.23 40min）
 字节上周末投的，有点晚了，原本投的部门挂了，现在是被其他部门捞起来的
@@ -1063,7 +1023,6 @@ JWT说说？
 4.零拷贝
 5.虚拟内存缺页异常
 6.页面置换算法
-7.算法：二叉树锯齿形遍历，只需要讲思路
 
 
 拥塞控制
@@ -1145,32 +1104,251 @@ sql语句
 
 ### 算法题
 手撕代码
-组合总和III（LeetCode 216）
+#### 39. 组合总和
+给你一个 无重复元素 的整数数组 candidates 和一个目标整数 target ，找出 candidates 中可以使数字和为目标数 target 的 所有 不同组合 ，并以列表形式返回。你可以按 任意顺序 返回这些组合。
+candidates 中的 **同一个 数字可以 无限制重复被选取** 。如果至少一个数字的被选数量不同，则两种组合是不同的。
+对于给定的输入，保证和为 target 的不同组合数少于 150 个。
+```c++
+class Solution {
+   
+public:
+    vector<vector<int>> combinationSum(vector<int>& candidates, int target) {
+       
+    }
+};
+```
+#### 216. 组合总和 III
+找出所有相加之和为 n 的 k 个数的组合，且满足下列条件：
+只使用数字1到9
+每个数字 最多使用一次
+返回 所有可能的有效组合的列表 。该列表不能包含相同的组合两次，组合可以以任何顺序返回。
+```c++
+class Solution {
+    vector<int> path;
+    vector<vector<int>> result;
+    void dfs(int target, int sum, int index, int k) {
+        if(path.size() == k) {
+            if(sum == target) {
+                result.push_back(path);
+                return ;
+            }
+        }
+        for(int i = index; i <= 9; i++) {
+            sum += i;
+            path.push_back(i);
+            dfs(target, sum, i + 1, k);
+            path.pop_back();
+            sum -= i;
+        }
+    }
+public:
+    vector<vector<int>> combinationSum3(int k, int n) {
+        dfs(n, 0, 1, k);
+        return result;
+    }
+};
+```
+
+
 n个节点的有向无环图，找到所有从0→n-1的路径。
-最长的回文子串（LeetCode 5）
-根据前中序重构二叉树（LeetCode 剑指offer 07）
-螺旋矩阵（LeetCode 54）
+#### 5. 最长回文子串 dp or 中心扩展
+给你一个字符串 s，找到 s 中最长的回文子串。
+```c++
+class Solution {
+public:
+    string longestPalindrome(string s) {
+        int left = 0; 
+        int n = s.size();
+        int maxVal = 0;
+        vector<vecotr<bool>> dp(n, vector<bool> (n, false));
+        for(int i = n - 1; i >= 0; i--) {
+            for(int j = i; j < n; j++) {
+                if(s[i] == s[j]) {
+                    if(j - i <= 1){
+                        dp[i][j] = true;
+                    } else if(dp[i + 1][j - 1]) {
+                        dp[i][j] = true;
+                    }
+                }
+                if(dp[i][j] && j - i + 1 > maxVal) {
+                    maxVal = j - i + 1;
+                    left = i;
+                }
+            }
+        }
+        return s.substr(left, maxVal);
+    }
+};
+```
+
+#### 根据前中序重构二叉树（LeetCode 剑指offer 07）
+#### 螺旋矩阵（LeetCode 54）
 手写单例模式
-二叉树的最近公共祖先（LeetCode 236）
-删除排序链表中的重复元素II（LeetCode 82）
+#### 二叉树的最近公共祖先（LeetCode 236）
+```c++
+class Solution {
+public:
+    TreeNode* lowestCommonAncestor(TreeNode* root, TreeNode* p, TreeNode* q) {
+        
+    }
+};
+```
+#### 82. 删除排序链表中的重复元素 II
+给定一个已排序的链表的头 head ， 删除原始链表中所有重复数字的节点，只留下不同的数字 。返回 已排序的链表 。
+```c++
+class Solution {
+public:
+    ListNode* deleteDuplicates(ListNode* head) {
+        if(!head || !head->next) return head;
+        ListNode* dummy = new ListNode(0);
+        dummy->next = head;
+        ListNode* cur = head;
+        ListNode* pre = dummy;
+        while(cur && cur->next) {
+            if(cur->val == cur->next->val) {
+                while(cur->next && cur->val == cur->next->val) {
+                    cur = cur->next;
+                }
+                pre->next = cur->next;
+                cur = cur->next;
+            } else {
+                pre = cur;
+                cur = cur->next;
+            }
+        }
+        return dummy->next;
+    }
+};
+```
 手写LRU
 不递归实现树的后序遍历
-链表右移k位
-二叉树的锯齿形遍历（LeetCode 103）
-接雨水 （LeetCode 42）
+#### 61. 旋转链表->链表右移k位
+给你一个链表的头节点 head ，旋转链表，将链表每个节点向右移动 k 个位置。
+```c++
+class Solution {
+public:
+    ListNode* rotateRight(ListNode* head, int k) {
+        if(!head || !head->next || !k) return head;
+        ListNode* cur = head;
+        int length = 0; 
+        while(cur) {
+            cur = cur->next;
+            length++;
+        }
+        if(length == 0)return head;
+        k %= length;
+        ListNode* dummy = new ListNode(0);
+        dummy->next = head;
+        ListNode* fast = head;
+        ListNode* slow = head;
+        while(k--) {
+            fast = fast->next;
+        }
+        while(fast->next) {
+            fast = fast->next;
+            slow = slow->next;
+        }
+        fast->next = dummy->next;
+        dummy->next = slow->next;
+        slow->next = nullptr;
+        return dummy->next;
+    }
+};
+```
+
+#### 二叉树的锯齿形遍历（LeetCode 103）
+#### 42. 接雨水
+给定 n 个非负整数表示每个宽度为 1 的柱子的高度图，计算按此排列的柱子，下雨之后能接多少雨水。
+```c++
+class Solution {
+public:
+    int trap(vector<int>& height) {
+        stack<int> st;
+        st.push(0);
+        int result = 0;
+        for(int i = 1; i < height.size(); i++) {
+            while(!st.empty() && height[i] >= height[st.top()]) {
+                int mid = st.top();
+                st.pop();
+                int h = min(height[i], heigt[st.top()]) - height[mid];
+                int w = i - st.top() - 1;
+                int maxVal = h * w;
+            }
+            st.push(i);
+            result = max(result, maxVal);
+        }
+        return result;
+    }
+};
+```
 打开转盘锁（LeetCode 752）
-每K个一组反转链表
-两个升序数组求交集
-TOPK （LeetCode 215）
-反转链表
-重排链表 （LeetCode 143）
-返回链表的环入口
-两个字符串找最长公共子串
-两个有序数组找中位数
-二叉树的最大宽度 （LeetCode 662）
-链表内指定区域反转
-数组求前K大的数
-k个有序链表合并
+#### 25. K 个一组翻转链表
+给你链表的头节点 head ，每 k 个节点一组进行翻转，请你返回修改后的链表。
+k 是一个正整数，它的值小于或等于链表的长度。如果节点总数不是 k 的整数倍，那么请将最后剩余的节点保持原有顺序。
+你不能只是单纯的改变节点内部的值，而是需要实际进行节点交换。
+```c++
+class Solution {
+public:
+    ListNode* reverseKGroup(ListNode* head, int k) {
+
+    }
+};
+```
+
+#### 215. 数组中的第K个最大元素
+给定整数数组 nums 和整数 k，请返回数组中第 k 个最大的元素。
+请注意，你需要找的是数组排序后的第 k 个最大的元素，而不是第 k 个不同的元素。
+你必须设计并实现时间复杂度为 O(n) 的算法解决此问题。
+```c++
+class Solution {
+public:
+    int findKthLargest(vector<int>& nums, int k) {
+        
+    }
+};
+```
+#### 反转链表
+```c++
+class Solution {
+public:
+    ListNode* reverseList(ListNode* head) {
+
+    }
+};
+```
+#### 反转链表II（LeetCode 92）
+#### 重排链表 （LeetCode 143）
+```c++
+class Solution {
+public:
+    void reorderList(ListNode* head) {
+
+    }
+};
+```
+#### 返回链表的环入口
+
+#### 二叉树的最大宽度 （LeetCode 662） dfs or BFS
+```c++
+class Solution {
+public:
+    int widthOfBinaryTree(TreeNode* root) {
+        
+    }
+};
+```
+
+#### 23. 合并K个升序链表
+给你一个链表数组，每个链表都已经按升序排列。
+请你将所有链表合并到一个升序链表中，返回合并后的链表。
+```c++
+class Solution {
+public:
+    ListNode* mergeKLists(vector<ListNode*>& lists) {
+
+    }
+};
+```
 完全平方和
 二叉树的路径和
 树的右视图
@@ -1180,48 +1358,107 @@ k个有序链表合并
 硬币兑换
 课程表（LeetCode 207）
 给一个升序数组，部分掉换，例：[4, 5, 6, 7, 0, 1, 2]，给一个target：0，找到位置
-最长递增子序列（LeetCode 300）
+#### 最长递增子序列（LeetCode 300）
 前序遍历+中序遍历构建树，在返回树的右视图
-树的z字型遍历
 给定一个字符数组，和一个字符串，在字符串里找到任意一个完全由字符数组组成的子串，字符顺序无所谓
 给一个数组，建一颗最小高度的二叉树（递归和非递归）
-反转链表II（LeetCode 92）
+
 求从一个树的左边的叶子节点到一个树右边的叶子节点的最短路径
 分割数组的最大值（LeetCode 410）
 复原IP地址（LeetCode 93）
 判断无向图是否存在环路
 * 算法：一个有序重复数组，一个target；数组中两两一组，合为target的个数
-  手撕题目 a是否是b的子树
+572. 另一棵树的子树
+给你两棵二叉树 root 和 subRoot 。检验 root 中是否包含和 subRoot 具有相同结构和节点值的子树。如果存在，返回 true ；否则，返回 false 。
+二叉树 tree 的一棵子树包括 tree 的某个节点和这个节点的所有后代节点。tree 也可以看做它自身的一棵子树。
+手撕题目 a是否是b的子树
+  链表内指定区域反转
+  两个字符串找最长公共子串
+  两个有序数组找中位数
+  两个升序数组求交集
+#### 算法：奇正序偶倒序链表重排
+##### 22. 括号生成
+数字 n 代表生成括号的对数，请你设计一个函数，用于能够生成所有可能的并且 有效的 括号组合。
+```c++
+class Solution {
+public:
+    vector<string> generateParenthesis(int n) {
 
-算法：奇正序偶倒序链表重排
-算法题是：leetcode 22题 https://leetcode-cn.com/problems/generate-parentheses/
+    }
+};
+```
+
 算法题：实现限流算法
 算法：跳楼梯(简单题)
-题目也很基础，算法题也简单，却心里觉得虚虚的
-一道算法题：最长递增子序列，没做出来，执着于在O(n)内解决了，其实不难，后面看了一下力扣原题复杂度需要O(n^2)，
-归根到底还是自己最近没怎么刷题，确实有些忘了。
-算法题
-环链
-算法题：给定一个二叉树和target，输出所有和为target的路径(不一定从根节点出发)
-算法题：1~26映射为A~Z，给定一串数字，输出所有可能的字母组合
-五、算法题（48min看了一下时间，这么快）
-全排列（LC46）
-算法题：滑动窗口最大值
-15. 排序算法你有了解吗？讲一下快速排序的思想，分析下时间复杂度？
-16. 三个线程依次轮流打印ABC，打印100次，说实话一直忙着刷高频题和记八股，这钟基础题写了半天没AC。 换道新题，将数组拆分成斐波那契数列，基本思想是回溯，但没AC。
-    做题：二叉树中序遍历 （我写了递归和非递归）
-3. 做题 最小覆盖子串但是不太一样思路差不多
-4. 做题：四个无序数组排成一个有序数组（我用的快排+归并）
-   岛屿数量
-   最长升序子序列
-17. 做题
+#### 300. 最长递增子序列
+给你一个整数数组 nums ，找到其中最长严格递增子序列的长度。
+子序列 是由数组派生而来的序列，删除（或不删除）数组中的元素而不改变其余元素的顺序。例如，[3,6,2,7] 是数组 [0,3,1,6,2,2,7] 的子序列。
+```c++
+class Solution {
+public:
+    int lengthOfLIS(vector<int>& nums) {
+
+    }
+};
+```
+
+#### 437. 路径总和 III
+给定一个二叉树的根节点 root ，和一个整数 targetSum ，求该二叉树里节点值之和等于 targetSum 的 路径 的数目。
+路径 不需要从根节点开始，也不需要在叶子节点结束，但是路径方向必须是向下的（只能从父节点到子节点）。
+```c++
+
+```
+
+#### 239. 滑动窗口最大值
+给你一个整数数组 nums，有一个大小为 k 的滑动窗口从数组的最左侧移动到数组的最右侧。你只可以看到在滑动窗口内的 k 个数字。滑动窗口每次只向右移动一位。
+返回 滑动窗口中的最大值 。
+```c++
+class Solution {
+public:
+    vector<int> maxSlidingWindow(vector<int>& nums, int k) {
+        
+    }
+};
+```
+#### 岛屿数量
+```c++
+class Solution {
+public:
+    int numIslands(vector<vector<char>>& grid) {
+    }
+};
+```
+#### 46. 全排列
+给定一个不含重复数字的数组 nums ，返回其 所有可能的全排列 。你可以 按任意顺序 返回答案。
+```c++
+class Solution {
+public:
+    vector<vector<int>> permute(vector<int>& nums) {
+        
+    }
+};
+```
+#### 47. 全排列 II
+给定一个可包含重复数字的序列 nums ，按任意顺序 返回所有不重复的全排列。
+````c++
+class Solution {
+public:
+    vector<vector<int>> permuteUnique(vector<int>& nums) {
+
+    }
+};
+````
+#### 排序算法你有了解吗？讲一下快速排序的思想，分析下时间复杂度？
+#### 三个线程依次轮流打印ABC，打印100次，说实话一直忙着刷高频题和记八股，这钟基础题写了半天没AC。 换道新题，将数组拆分成斐波那契数列，基本思想是回溯，但没AC。
+#### 二叉树中序遍历 
+####  做题 最小覆盖子串但是不太一样思路差不多
+### 算法题：1~26映射为A~Z，给定一串数字，输出所有可能的字母组合
+#### 做题：四个无序数组排成一个有序数组（我用的快排+归并）
+
+#### 做题
 - 如何判断一个链表是否有环（构建有环的链表出了点问题，双指针，hashset两种解法）
 - 爬楼梯（动态规划）
-17. 做题
-- 如何判断一个链表是否有环（构建有环的链表出了点问题，双指针，hashset两种解法）
-- 爬楼梯（动态规划）
-  算法题
-  二叉树层序遍历
+
 
 基于上面的代码如何实现左视图和右视图，如何垂直输出？
 * 拉链法实现个 map
@@ -1229,11 +1466,9 @@ k个有序链表合并
 下来之后自己好好写了个，看这里：https://codetop.cc/discuss/232
 * 递归和非递归前序遍历二叉树
 * 二叉树的最大直径
-* 手撕：反转链表
 * 剑指 Offer 42. 连续子数组的最大和
 * 124. 二叉树中的最大路径和
 * 64. 最小路径和
-* 剑指 Offer 28. 对称的二叉树
   分析复杂度
 * 3. 无重复字符的最长子串
   分析复杂度及优化
@@ -1249,12 +1484,12 @@ k个有序链表合并
 * 最长回文串；
 * 全排列
 * 不重复的全排列
-* 全排列 2、岛屿数量，leetcode原题
+
 * 给一个排序数组，找众数的下标（出现次数大于等于数组长度的一半），要求O(logN)。
 * LeetCode 102. 二叉树的层序遍历，需要自己建树验证。
 * 会议室II，leetcode原题
 * 二叉树最大宽度 leetcode原题
-* 二叉树Z形遍历
+
 
 * 判断是否是二叉搜索树
 * k值的最小字典序列
@@ -1267,29 +1502,28 @@ k个有序链表合并
 * 一个序列，先增后减，例如 1，4，6，9，13，10，6，2 找某一个数是否在其中。[二分查找]
 * 二叉树的镜像。
 * 给两个数 求他们的平均数 只能用int
-* 两数之和
+#### 两数之和
 * N个长度为K的有序链表合并，时间复杂度，空间复杂度
 * 找出一个字符串最长不包含重复字符的字串的长度。
 * 股票买卖一次最大利润、买卖多次最大利润
 
-* 二叉树层次遍历
 * 一个二维数组，左到右、上到下递增，找到目标值的位置。
 * （只说思路）：
 一维数组里是正整数，会重复，求其中连续增长的最长子串的长度？如果不是连续子串呢？
 41个正整数，找出其中出现次数最多的数
 * 找到二叉树的路径和为target的所有路径并打印出来。（注意，不一定是从根节点出发）， AC。
 * 给一个排序数组，找众数的下标（出现次数大于等于数组长度的一半），要求O(logN)。
-* 143. 重排链表
-反问：具体做些啥
-熟悉什么语言？使用中遇到的问题
-golang map【循环】两次打印 结果一样吗？map使用注意事项？不一样。多线程访问。不安全。
 
+
+
+
+
+
+golang map【循环】两次打印 结果一样吗？map使用注意事项？不一样。多线程访问。不安全。
 
 
 文件里面 两亿个数，找到最大100个的
 系统的文件日志，几千万条，怎么找出出现最多的ip地址。
-
-
 
 设计一个栈 ，pop push getMax 时间复杂度o
 一个数组，除了一个数出现一次，其他都是两次，求该数？如果有两个数呢 ？[异或位运算]
