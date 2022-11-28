@@ -1,3 +1,27 @@
+
+# 单例模式
+```c++
+class singleton {};
+private: 
+    singleton();
+    singleton(const singleton& other);
+public:
+    static singleton* getinstace() {
+        static singleton instance;
+        return &instace;
+    }
+    singleton* getinstance() {
+        Lock lock;
+        if(instance == nullptr) {
+            instance_ = new singleton;
+        }
+        return instance_;
+    }
+```
+
+
+
+
 ### 结构体对齐：
 2个原则：
 
@@ -132,7 +156,7 @@ const成员函数 const对象不能调用非const成员函数 不能改变非mut
 
 ### 顶层const vs 底层const
 const修饰变量本身是一个常量
-const修饰变量所指的对象是要给常量
+const修饰变量所指的对象是常量
 const_cats改变底层const
 
 ### override  final
