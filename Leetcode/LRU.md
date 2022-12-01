@@ -54,140 +54,90 @@ public:
 };
 ```
 ```c++
-/ 总的思想就是 哈希双向链表
-struct Node
-{
-    int key;
-    int value;
-    Node* pre;
-    Node* next;
-    // 构造函数初始化
-    Node(int key, int value) : key(key), value(value), pre(nullptr), next(nullptr){}
+struct DLinkedNode {
+    int key, value;
+    DLinkedNode* prev;
+    DLinkedNode* next;
+    DLinkedNode(): key(0), value(0), prev(nullptr), next(nullptr) {}
+    DLinkedNode(int _key, int _value): key(_key), value(_value), prev(nullptr), next(nullptr) {}
 };
 
 class LRUCache {
 private:
-    int size;// 缓冲区大小
-    Node* head;
-    Node* tail;
-    map<int, Node*> p;
+    unordered_map<int, DLinkedNode*> cache;
+    DLinkedNode* head;
+    DLinkedNode* tail;
+    int size;
+    int capacity;
 
 public:
-    LRUCache(int capacity) {
-        this->size = capacity;
-        head = nullptr;
-        tail = nullptr;
+    LRUCache(int _capacity): capacity(_capacity), size(0) {
+        // 使用伪头部和伪尾部节点
+        head = new DLinkedNode();
+        tail = new DLinkedNode();
+        head->next = tail;
+        tail->prev = head;
     }
-// 获取缓冲区中 key 对应的 value
+    
     int get(int key) {
-        // 1.当该 key 值存在
-        if(p.count(key) > 0)
-        {
-            // 删除该 key 对应的原来节点
-            Node* cur = p[key];
-            int value = cur->value;
-            remove(cur);   // 这里仅仅删除哈希双向链表中的节点，不必删除哈希表中的                 
-            // 将节点重现插入到缓冲区的头部
-            setHead(cur);                     
-            return value;
+        if (!cache.count(key)) {
+            return -1;
         }
-        // 2.当该 key 值不存在
-        return -1;
+        // 如果 key 存在，先通过哈希表定位，再移到头部
+        DLinkedNode* node = cache[key];
+        moveToHead(node);
+        return node->value;
     }
-// 将key-value值存入缓冲区
+    
     void put(int key, int value) {
-        // 1.当该 key 值存在
-        if(p.count(key) > 0)
-        {
-            // 删除该 key 对应的原来节点
-            Node* cur = p[key];
-            cur->value = value;
-            remove(cur);    // 这里仅仅删除哈希双向链表中的节点，不必删除哈希表中的                                
-            // 将节点重现插入到缓冲区的头部
-            setHead(cur);
-        }
-        else// 2.当该 key 值不存在
-        {
-            Node* node = new Node(key, value);
-            // 判断当前缓冲区大小已经满了
-            if(p.size() >= size)
-            {
-                // 删除尾部节点
-                map<int, Node*>::iterator it = p.find(tail->key);// 返回迭代器类型
-                remove(tail);
-                p.erase(it);// 这里erase 函数参数是迭代器类型，所以上面需要使用迭代器类型
-                // 将新节点插入到缓冲区的头部
+        if (!cache.count(key)) {
+            // 如果 key 不存在，创建一个新的节点
+            DLinkedNode* node = new DLinkedNode(key, value);
+            // 添加进哈希表
+            cache[key] = node;
+            // 添加至双向链表的头部
+            addToHead(node);
+            ++size;
+            if (size > capacity) {
+                // 如果超出容量，删除双向链表的尾部节点
+                DLinkedNode* removed = removeTail();
+                // 删除哈希表中对应的项
+                cache.erase(removed->key);
+                // 防止内存泄漏
+                delete removed;
+                --size;
             }
-            //else 此时因为动作和上面重复，所以直接合并使用
-            //还没有满：将新节点插入到缓冲区的头部
-            {
-                setHead(node);
-                p[key] = node;
-            }
+        } else {
+            // 如果 key 存在，先通过哈希表定位，再修改 value，并移到头部
+            DLinkedNode* node = cache[key];
+            node->value = value;
+            moveToHead(node);
         }
     }
 
-    // 删除当前节点
-    void remove(Node* cur)
-    {
-        // 当前节点是 head
-        if(cur == head)
-            head = cur->next;
-        else if(cur == tail)// 当前节点是 tail
-            tail = cur->pre;
-        else// 当前节点是一般节点
-        {
-            cur->pre->next = cur->next;
-            cur->next->pre = cur->pre;
-        }
+    void addToHead(DLinkedNode* node) {
+        node->prev = head;
+        node->next = head->next;
+        head->next->prev = node;
+        head->next = node;
     }
-    // 将当前节点插入到头部
-    void setHead(Node* cur)
-    {
-        cur->next = head;
-        if(head != nullptr)
-            head->pre = cur;
-        head = cur;//重现更新head
+    
+    void removeNode(DLinkedNode* node) {
+        node->prev->next = node->next;
+        node->next->prev = node->prev;
+    }
 
-        if(tail==nullptr)
-            tail = head;
+    void moveToHead(DLinkedNode* node) {
+        removeNode(node);
+        addToHead(node);
+    }
+
+    DLinkedNode* removeTail() {
+        DLinkedNode* node = tail->prev;
+        removeNode(node);
+        return node;
     }
 };
-```
-```c++
-class LRUCache {
-private:
-    int cap;
-    list<pair<int, int>> cache;
-    unordered_map<int, list<pair<int, int>>::iterator> map;
-public:
-    LRUCache(int capacity) : cap(capacity) {
-    }
 
-    int get(int key) {
-        if(map[key] == map.end()) return -1;
-        auto key_value = *map[key];
-        cache.erase(map[key]);
-        cache.push_front(key_value);
-        map[key]  = cache.begin();
-        return key_value.second;
-    }
-
-    void put(int key, int value) {
-       if(!map.count(key)) {
-           if(cache.size() == cap) {
-               map.erase(cache.back().first);
-               cache.pop_back();
-           }
-       } else {
-           cache.erase(map[key]);
-       }
-       cache.push_front({key, value});
-       map[key] = cache.begin();
-    } 
-
-};
-
-```
 
 ```

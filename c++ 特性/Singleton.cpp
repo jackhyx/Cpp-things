@@ -77,7 +77,8 @@ public:
     static std::shared_ptr<Singleton> get_instance() {
         static std::once_flag s_flag;
         //std::call_once(s_flag, createInstance);
-        std::call_once(s_flag, [] { m_instance_ptr = std::shared_ptr<Singleton>(new Singleton); });
+        std::call_once(s_flag, [] { m_instance_ptr = std::shared_ptr<Singleton>(new Singleton);
+        });
         return m_instance_ptr;
     }
 
